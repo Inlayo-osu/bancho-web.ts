@@ -16,8 +16,7 @@ import { PillTabs } from "@/components/ui/PillTabs";
 import { api, type ScoreScope } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/http";
 import type { MostPlayedMap, PlayerScore } from "@/lib/api/types";
-import { env } from "@/lib/env";
-import { replayDownloadUrl } from "@/lib/assets";
+import { avatarUrl, replayDownloadUrl } from "@/lib/assets";
 import {
   formatAccuracy,
   formatNumber,
@@ -94,13 +93,17 @@ export function PlayerPage() {
 
   const player = playerQuery.data;
   const profileStats = statsQuery.data?.find((entry) => entry.mode === 0);
-  usePageTitle(player?.name, {
+  usePageTitle(player ? `${player.name}'s profile` : undefined, {
     description: player
-      ? `${player.name} is a player from ${player.country}. ${
-          profileStats?.rank != null ? `Rank #${formatNumber(profileStats.rank)} · ` : ""
-        }${profileStats ? formatPerformance(profileStats.pp) : "Profile and scores"}.`
+      ? `${player.name} | ${player.country} | Global rank ${
+          profileStats?.rank != null ? `#${formatNumber(profileStats.rank)}` : "unranked"
+        } | Country rank ${
+          profileStats?.country_rank != null
+            ? `#${formatNumber(profileStats.country_rank)}`
+            : "unranked"
+        } | ${profileStats ? formatPerformance(profileStats.pp) : "No PP yet"}`
       : undefined,
-    image: player ? `${env.avatarsBaseUrl}/${player.id}` : undefined,
+    image: player ? avatarUrl(player.id) : undefined,
     type: "profile",
   });
 

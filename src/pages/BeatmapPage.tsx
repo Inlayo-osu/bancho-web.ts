@@ -54,7 +54,7 @@ export function BeatmapPage() {
       : undefined,
     {
       description: beatmap
-        ? `${beatmap.artist} - ${beatmap.title} [${beatmap.version}] mapped by ${beatmap.creator}.`
+        ? `${beatmap.artist} - ${beatmap.title} [${beatmap.version}] | ${beatmap.diff.toFixed(2)}★ | ${Math.round(beatmap.bpm)} BPM | ${beatmap.total_length}s | mapped by ${beatmap.creator}`
         : undefined,
       image: beatmap ? beatmapCoverUrl(beatmap.set_id) : undefined,
     },

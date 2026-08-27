@@ -10,7 +10,7 @@ function readCaptchaProvider(): CaptchaProvider | null {
 
 /** Build-time configuration with sensible defaults for local dev. */
 export const env = {
-  appName: import.meta.env.VITE_APP_NAME ?? "bancho.py",
+  appName: import.meta.env.VITE_APP_NAME ?? "Inlayo",
   homeVideoUrl: import.meta.env.VITE_HOME_VIDEO_URL ?? "/home-bg.mp4",
   banchoDomain: import.meta.env.VITE_BANCHO_DOMAIN ?? "cmyui.xyz",
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL ?? "/api",

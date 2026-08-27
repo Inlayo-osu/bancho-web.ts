@@ -12,7 +12,7 @@ export function Footer() {
             rel="noreferrer"
             className="text-accent hover:text-accent-hover"
           >
-            bancho.py
+            Inlayo
           </a>
           {env.discordInviteUrl && (
             <>
