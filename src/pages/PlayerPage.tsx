@@ -362,9 +362,9 @@ function ScoreRow({ score }: { score: PlayerScore }) {
         aria-label="View score details"
       />
       {beatmap ? (
-        <BeatmapThumb setId={beatmap.set_id} className="h-12 w-[5.25rem] shrink-0" />
+        <BeatmapThumb setId={beatmap.set_id} className="ml-1.5 h-12 w-[5.25rem] shrink-0" />
       ) : (
-        <span className="block h-12 w-[5.25rem] shrink-0 bg-surface-3" />
+        <span className="ml-1.5 block h-12 w-[5.25rem] shrink-0 bg-surface-3" />
       )}
       <GradeBadge grade={score.grade} />
 
@@ -440,7 +440,10 @@ function MostPlayedList({
 function MostPlayedRow({ map }: { map: MostPlayedMap }) {
   return (
     <li className="flex items-center gap-3.5 overflow-hidden rounded-xl border border-line bg-surface pr-4 transition-colors hover:bg-surface-2">
-      <BeatmapThumb setId={map.set_id} className="h-12 w-[5.25rem] shrink-0" />
+      <BeatmapThumb
+        setId={map.set_id}
+        className="ml-1.5 h-12 w-[5.25rem] shrink-0"
+      />
       <div className="min-w-0 flex-1 py-2">
         <Link
           to={`/b/${map.id}`}
