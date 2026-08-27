@@ -88,10 +88,19 @@ export function HomePage() {
           <p className="text-sm font-semibold text-accent">Step 2</p>
           <h2 className="mt-1 font-bold">Point it at the server</h2>
           <p className="mt-2 text-sm text-muted">
-            Add the devserver flag to your osu! shortcut's target:
+            Download{" "}
+            <a
+              href="https://assets.inlayo.com/patcher/Inlayo-patcher.exe"
+              target="_blank"
+              rel="noreferrer"
+              className="text-accent hover:text-accent-hover"
+            >
+              Inlayo-patcher
+            </a>{" "}
+            and open!
           </p>
           <code className="mt-3 block overflow-x-auto rounded-lg bg-canvas px-3 py-2 text-xs text-slate-200">
-            osu!.exe -devserver {env.banchoDomain}
+            https://assets.inlayo.com/patcher/Inlayo-patcher.exe
           </code>
         </Card>
 

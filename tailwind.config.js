@@ -17,7 +17,7 @@ export default {
     },
     extend: {
       colors: {
-        // near-black neutral dark palette with a crimson accent
+        // near-black neutral dark palette with a pastel indigo accent
         canvas: "#0d0e12",
         surface: "#15161c",
         "surface-2": "#1c1e26",
@@ -25,11 +25,11 @@ export default {
         line: "#282b37",
         muted: "#9099ad",
         accent: {
-          DEFAULT: "#e5484d",
-          hover: "#f2555a",
-          soft: "#e5484d26",
+          DEFAULT: "#b8c4ff",
+          hover: "#cbd4ff",
+          soft: "#b8c4ff26",
           // secondary hue, used sparingly in gradients
-          2: "#6e56cf",
+          2: "#8798e8",
         },
       },
       fontFamily: {

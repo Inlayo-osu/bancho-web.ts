@@ -9,7 +9,7 @@ interface PillTabsProps<T> {
   value: T;
   onChange: (value: T) => void;
   /**
-   * accent: pink active tab, for primary switchers (game mode).
+  * accent: pastel indigo active tab, for primary switchers (game mode).
    * neutral: subtle active tab, for secondary switchers (sorts, tabs).
    */
   variant?: "accent" | "neutral";

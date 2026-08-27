@@ -18,18 +18,6 @@ export function Navbar() {
       <header className="rounded-b-2xl border-b border-line bg-surface">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-6 px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2.5">
-          <svg viewBox="0 0 64 64" className="h-6 w-6" aria-hidden>
-            <circle cx="32" cy="32" r="30" fill="#e5484d" />
-            <circle
-              cx="32"
-              cy="32"
-              r="21"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="5"
-            />
-            <circle cx="32" cy="32" r="8" fill="#fff" />
-          </svg>
           <span className="text-[15px] font-semibold tracking-tight">
             {env.appName}
           </span>

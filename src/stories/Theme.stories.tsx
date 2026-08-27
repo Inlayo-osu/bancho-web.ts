@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 /**
- * The brand theme: a near-black neutral palette with a crimson accent
+ * The brand theme: a near-black neutral palette with a pastel indigo accent
  * (and a violet secondary used sparingly in gradients). Tokens are
  * defined in `tailwind.config.js` and used via utility classes; this
  * page documents them for reference.
