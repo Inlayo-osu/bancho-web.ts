@@ -67,6 +67,18 @@ function modeName(modeId) {
   return modeNames[modeId] || "osu!standard";
 }
 
+const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
+
+function countryName(countryCode) {
+  if (!countryCode || countryCode.toLowerCase() === "xx") return "Unknown";
+  return countryDisplayNames.of(countryCode.toUpperCase()) || countryCode.toUpperCase();
+}
+
+function mapLength(seconds) {
+  const totalSeconds = Math.max(0, Math.round(Number(seconds) || 0));
+  return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, "0")}`;
+}
+
 function injectMeta(html, { title, description, image, url, type = "website" }) {
   const tags = [
     `<title>${escapeHtml(title)}</title>`,
@@ -97,7 +109,7 @@ async function fetchJson(pathname) {
   return body.data;
 }
 
-async function getMetadata(pathname) {
+async function getMetadata(pathname, searchParams = new URLSearchParams()) {
   const playerMatch = pathname.match(/^\/u\/([^/]+)$/);
   if (playerMatch) {
     const player = await fetchJson(`/v2/players/${encodeURIComponent(playerMatch[1])}`);
@@ -107,7 +119,7 @@ async function getMetadata(pathname) {
     } catch {}
     return {
       title: `${player.name}'s profile | ${appName}`,
-      description: `${player.name} | ${player.country} | Global rank ${stats?.rank ? `#${stats.rank}` : "unranked"} | ${stats?.pp ? `${Math.round(stats.pp)}pp` : "No PP yet"}`,
+      description: `${player.name} | ${countryName(player.country)} (${player.country.toUpperCase()}) | Global rank ${stats?.rank != null ? `#${stats.rank}` : "unranked"} | Country rank ${stats?.country_rank != null ? `#${stats.country_rank}` : "unranked"} | ${stats?.pp != null ? `${Math.round(stats.pp)}pp` : "No PP yet"} | ${stats?.acc != null ? `${Number(stats.acc).toFixed(2)}% accuracy` : ""} | ${stats?.plays != null ? `${stats.plays} plays` : ""}${player.clan_id ? ` | Clan #${player.clan_id}` : ""}`,
       image: `${process.env.VITE_AVATARS_BASE_URL || "https://a.inlayo.com"}/${player.id}`,
       type: "profile",
     };
@@ -118,7 +130,7 @@ async function getMetadata(pathname) {
     const map = await fetchJson(`/v2/maps/${mapMatch[1]}`);
     return {
       title: `${map.artist} - ${map.title} [${map.version}] | ${appName}`,
-      description: `${map.artist} - ${map.title} [${map.version}] | ${Number(map.diff).toFixed(2)}★ | ${Math.round(map.bpm)} BPM | ${map.total_length}s | mapped by ${map.creator}`,
+      description: `${map.artist} - ${map.title} [${map.version}] | ${Number(map.diff).toFixed(2)}★ | ${Math.round(map.bpm)} BPM | ${mapLength(map.total_length)} | CS ${Number(map.cs).toFixed(1)} | AR ${Number(map.ar).toFixed(1)} | OD ${Number(map.od).toFixed(1)} | HP ${Number(map.hp).toFixed(1)} | mapped by ${map.creator}`,
       image: `https://assets.ppy.sh/beatmaps/${map.set_id}/covers/cover.jpg`,
     };
   }
@@ -128,12 +140,80 @@ async function getMetadata(pathname) {
     const score = await fetchJson(`/v2/scores/${scoreMatch[1]}`);
     return {
       title: `${score.player.name} on ${score.beatmap.artist} - ${score.beatmap.title} | ${appName}`,
-      description: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] | ${Math.round(score.score)} score | ${Number(score.acc).toFixed(2)}% accuracy | ${modeName(score.mode)} | ${Math.round(score.pp)}pp | Grade ${score.grade} | ${score.max_combo}x combo | ${score.nmiss} misses`,
+      description: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] | ${Math.round(score.score)} score | ${Number(score.acc).toFixed(2)}% accuracy | ${modeName(score.mode)} | ${Math.round(score.pp)}pp | Grade ${score.grade} | ${score.max_combo}x combo | ${score.nmiss} misses | ${score.player.name}`,
       image: `https://assets.ppy.sh/beatmaps/${score.beatmap.set_id}/covers/cover.jpg`,
     };
   }
 
-  return { title: appName, description: `Explore ${appName} player profiles, leaderboards, beatmaps, and scores.` };
+  if (pathname === "/leaderboard") {
+    const modeId = Number(searchParams.get("mode") || 0);
+    const sort = searchParams.get("sort") || "pp";
+    const country = searchParams.get("country");
+    const mode = modeName(modeId);
+    let description = `${mode} leaderboard on ${appName} | sorted by ${sort}`;
+    if (country) description += ` | country ${country.toUpperCase()}`;
+    try {
+      const entries = await fetchJson(`/v2/leaderboards/${modeId}?sort=${encodeURIComponent(sort)}&page=1&page_size=1${country ? `&country=${encodeURIComponent(country)}` : ""}`);
+      const top = entries[0];
+      if (top) description += ` | #1 ${top.name} with ${Math.round(top.pp)}pp`;
+    } catch (error) {
+      console.error(`Could not load leaderboard metadata for ${pathname}:`, error);
+    }
+    return { title: `${mode} leaderboard | ${appName}`, description };
+  }
+
+  if (pathname === "/clans") {
+    return {
+      title: `Clans | ${appName}`,
+      description: `Browse player-run clans on ${appName}.`,
+    };
+  }
+
+  const clanMatch = pathname.match(/^\/clan\/(\d+)$/);
+  if (clanMatch) {
+    const clan = await fetchJson(`/v2/clans/${clanMatch[1]}`);
+    return {
+      title: `[${clan.tag}] ${clan.name} | ${appName}`,
+      description: `[${clan.tag}] ${clan.name} clan on ${appName}.`,
+    };
+  }
+
+  const pageMetadata = {
+    "/": {
+      title: appName,
+      description: `${appName} osu! server with player profiles, leaderboards, beatmaps, and scores.`,
+    },
+    "/login": {
+      title: `Sign in | ${appName}`,
+      description: `Sign in to your ${appName} account.`,
+    },
+    "/register": {
+      title: `Register | ${appName}`,
+      description: `Create an account on ${appName}.`,
+    },
+    "/forgot-password": {
+      title: `Reset password | ${appName}`,
+      description: `Reset your ${appName} account password.`,
+    },
+    "/verify-email": {
+      title: `Verify email | ${appName}`,
+      description: `Verify your email address for ${appName}.`,
+    },
+    "/friends": {
+      title: `Friends | ${appName}`,
+      description: `View your friends on ${appName}.`,
+    },
+    "/settings": {
+      title: `Settings | ${appName}`,
+      description: `Manage your ${appName} account and profile.`,
+    },
+  };
+  if (pageMetadata[pathname]) return pageMetadata[pathname];
+
+  return {
+    title: `Page not found | ${appName}`,
+    description: `The requested page could not be found on ${appName}.`,
+  };
 }
 
 async function serve(request, response) {
@@ -144,7 +224,7 @@ async function serve(request, response) {
 
   if (botPattern.test(userAgent)) {
     try {
-      const metadata = await getMetadata(pathname);
+      const metadata = await getMetadata(pathname, requestUrl.searchParams);
       const html = injectMeta(template, { ...metadata, url: `${siteUrl}${pathname}` });
       response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       response.end(html);
