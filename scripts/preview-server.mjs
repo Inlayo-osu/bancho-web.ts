@@ -20,9 +20,9 @@ for (const envFile of [".env"]) {
 }
 
 const appName = process.env.VITE_APP_NAME || "Inlayo";
-const siteUrl = (process.env.META_SITE_URL || "http://localhost:4173").replace(/\/$/, "");
+const siteUrl = (process.env.META_SITE_URL || "https://osu.inlayo.com").replace(/\/$/, "");
 const apiTarget = (process.env.META_API_TARGET || "http://127.0.0.1:10000").replace(/\/$/, "");
-const apiHost = process.env.META_API_HOST || (process.env.BANCHO_DOMAIN ? `api.${process.env.BANCHO_DOMAIN}` : undefined);
+const apiHost = process.env.META_API_HOST || (process.env.BANCHO_DOMAIN ? `api.${process.env.BANCHO_DOMAIN}` : "api.inlayo.com");
 const port = Number(process.env.META_PORT || 4173);
 
 const botPattern = /discordbot|twitterbot|facebookexternalhit|slackbot|whatsapp|telegrambot|googlebot/i;
@@ -104,7 +104,7 @@ async function getMetadata(pathname) {
     return {
       title: `${player.name}'s profile | ${appName}`,
       description: `${player.name} | ${player.country} | Global rank ${stats?.rank ? `#${stats.rank}` : "unranked"} | ${stats?.pp ? `${Math.round(stats.pp)}pp` : "No PP yet"}`,
-      image: `${process.env.VITE_AVATARS_BASE_URL || "https://a.cmyui.xyz"}/${player.id}`,
+      image: `${process.env.VITE_AVATARS_BASE_URL || "https://a.inlayo.com"}/${player.id}`,
       type: "profile",
     };
   }
