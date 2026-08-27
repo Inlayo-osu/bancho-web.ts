@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { ApiError } from "@/lib/api/http";
 import { api } from "@/lib/api/client";
@@ -9,6 +9,7 @@ export function ForgotPasswordPage() {
   usePageTitle("Reset password");
 
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const token = searchParams.get("token");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +17,17 @@ export function ForgotPasswordPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetComplete, setIsResetComplete] = useState(false);
+
+  useEffect(() => {
+    if (!isResetComplete) return;
+
+    const redirectTimer = window.setTimeout(() => {
+      navigate("/login", { replace: true });
+    }, 5000);
+
+    return () => window.clearTimeout(redirectTimer);
+  }, [isResetComplete, navigate]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -30,7 +42,10 @@ export function ForgotPasswordPage() {
           return;
         }
         await api.confirmPasswordReset({ token, password });
-        setMessage("Your password has been reset. You can sign in now.");
+        setMessage(
+          "Your password has been reset. Redirecting to sign in in 5 seconds.",
+        );
+        setIsResetComplete(true);
       } else {
         await api.requestPasswordReset(email);
         setMessage("Password reset email sent.");
@@ -128,7 +143,13 @@ export function ForgotPasswordPage() {
           disabled={isSubmitting}
           className="w-full rounded-xl bg-accent px-4 py-2.5 font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Saving..." : token ? "Reset password" : "Send reset link"}
+          {isSubmitting
+            ? token
+              ? "Saving..."
+              : "Sending..."
+            : token
+              ? "Reset password"
+              : "Send reset link"}
         </button>
 
         <p className="text-center text-sm text-muted">

@@ -167,31 +167,27 @@ export function RegisterPage() {
           <span className="mb-1.5 block text-sm font-medium text-muted">
             Email
           </span>
-          <input
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
+          <div className="mt-2 flex gap-2">
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
               onChange={(event) => {
                 setEmail(event.target.value);
                 setEmailToken("");
                 setEmailVerificationToken("");
                 setEmailSent(false);
               }}
-            className={inputClass}
-          />
-          <div className="mt-2 flex gap-2">
+              className={`${inputClass} flex-1`}
+            />
             <button
               type="button"
               disabled={!email || isSendingEmail || emailVerified}
               onClick={sendVerificationEmail}
               className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isSendingEmail
-                ? "Sending..."
-                : emailVerified
-                  ? "Verified"
-                  : "Send verification email"}
+              {isSendingEmail ? "Sending..." : emailVerified ? "Verified" : "Send"}
             </button>
           </div>
           {emailSent && !emailVerified && (
