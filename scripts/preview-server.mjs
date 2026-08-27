@@ -84,11 +84,15 @@ function injectMeta(html, { title, description, image, url, type = "website" }) 
 }
 
 async function fetchJson(pathname) {
-  const response = await fetch(`${apiTarget}${pathname}`, {
+  const requestUrl = `${apiTarget}${pathname}`;
+  const response = await fetch(requestUrl, {
     headers: { Accept: "application/json", ...(apiHost ? { Host: apiHost } : {}) },
   });
-  if (!response.ok) throw new Error(`API returned ${response.status}`);
-  const body = await response.json();
+  const responseText = await response.text();
+  if (!response.ok) {
+    throw new Error(`API returned ${response.status} for ${requestUrl} with Host ${apiHost || "default"}: ${responseText.slice(0, 200)}`);
+  }
+  const body = JSON.parse(responseText);
   if (body.status !== "success" || body.data === undefined) throw new Error("Invalid API response");
   return body.data;
 }
