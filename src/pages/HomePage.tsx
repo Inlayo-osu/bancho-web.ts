@@ -21,19 +21,33 @@ export function HomePage() {
     <div className="space-y-6">
       {/* hero */}
       <section className="relative overflow-hidden rounded-2xl border border-line bg-surface px-6 py-14 text-center sm:px-12">
+        <video
+          aria-hidden
+          autoPlay
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-35"
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          src={env.homeVideoUrl}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-slate-950/65"
+        />
         <div
           aria-hidden
           className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-accent/20 blur-3xl"
         />
-        <h1 className="relative text-4xl font-semibold tracking-tight sm:text-[2.75rem]">
+        <h1 className="relative z-10 text-4xl font-semibold tracking-tight sm:text-[2.75rem]">
           Welcome to <span className="text-accent">{env.appName}</span>
         </h1>
-        <p className="relative mx-auto mt-4 max-w-xl text-muted">
+        <p className="relative z-10 mx-auto mt-4 max-w-xl text-muted">
           A private osu! server with global leaderboards for vanilla, relax
           and autopilot — jump in and start setting scores.
         </p>
 
-        <div className="relative mt-8 flex items-center justify-center gap-3">
+        <div className="relative z-10 mt-8 flex items-center justify-center gap-3">
           <Link
             to="/register"
             className="rounded-xl bg-accent px-6 py-2.5 font-semibold text-white transition-colors hover:bg-accent-hover"
@@ -48,7 +62,7 @@ export function HomePage() {
           </Link>
         </div>
 
-        <div className="relative mt-10 flex items-center justify-center gap-8 text-sm">
+        <div className="relative z-10 mt-10 flex items-center justify-center gap-8 text-sm">
           <div>
             <p className="text-xl font-semibold text-accent">
               {stats ? formatNumber(stats.online_players) : "—"}
