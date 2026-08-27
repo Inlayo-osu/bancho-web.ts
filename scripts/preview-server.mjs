@@ -82,6 +82,7 @@ function mapLength(seconds) {
 function injectMeta(html, { title, description, image, url, type = "website" }) {
   const tags = [
     `<title>${escapeHtml(title)}</title>`,
+    `<link rel="canonical" href="${escapeHtml(url)}" />`,
     metaTag("name", "description", description),
     metaTag("property", "og:title", title),
     metaTag("property", "og:description", description),
@@ -112,7 +113,19 @@ async function fetchJson(pathname) {
 async function getMetadata(pathname, searchParams = new URLSearchParams()) {
   const playerMatch = pathname.match(/^\/u\/([^/]+)$/);
   if (playerMatch) {
-    const player = await fetchJson(`/v2/players/${encodeURIComponent(playerMatch[1])}`);
+    const playerId = decodeURIComponent(playerMatch[1]);
+    let player;
+    try {
+      player = await fetchJson(`/v2/players/${encodeURIComponent(playerId)}`);
+    } catch (error) {
+      console.error(`Could not load player metadata for ${pathname}:`, error);
+      return {
+        title: `Player ${playerId} | ${appName}`,
+        description: `View player ${playerId}'s profile on ${appName}.`,
+        image: `${process.env.VITE_AVATARS_BASE_URL || "https://a.inlayo.com"}/${encodeURIComponent(playerId)}`,
+        type: "profile",
+      };
+    }
     let stats;
     try {
       stats = (await fetchJson(`/v2/players/${player.id}/stats`)).find((entry) => entry.mode === 0);
@@ -127,7 +140,16 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
 
   const mapMatch = pathname.match(/^\/b\/(\d+)$/);
   if (mapMatch) {
-    const map = await fetchJson(`/v2/maps/${mapMatch[1]}`);
+    let map;
+    try {
+      map = await fetchJson(`/v2/maps/${mapMatch[1]}`);
+    } catch (error) {
+      console.error(`Could not load beatmap metadata for ${pathname}:`, error);
+      return {
+        title: `Beatmap #${mapMatch[1]} | ${appName}`,
+        description: `View beatmap #${mapMatch[1]} on ${appName}.`,
+      };
+    }
     return {
       title: `${map.artist} - ${map.title} [${map.version}] | ${appName}`,
       description: `${map.artist} - ${map.title} [${map.version}] | ${Number(map.diff).toFixed(2)}★ | ${Math.round(map.bpm)} BPM | ${mapLength(map.total_length)} | CS ${Number(map.cs).toFixed(1)} | AR ${Number(map.ar).toFixed(1)} | OD ${Number(map.od).toFixed(1)} | HP ${Number(map.hp).toFixed(1)} | mapped by ${map.creator}`,
@@ -137,7 +159,16 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
 
   const scoreMatch = pathname.match(/^\/s\/(\d+)$/);
   if (scoreMatch) {
-    const score = await fetchJson(`/v2/scores/${scoreMatch[1]}`);
+    let score;
+    try {
+      score = await fetchJson(`/v2/scores/${scoreMatch[1]}`);
+    } catch (error) {
+      console.error(`Could not load score metadata for ${pathname}:`, error);
+      return {
+        title: `Score #${scoreMatch[1]} | ${appName}`,
+        description: `View score #${scoreMatch[1]} on ${appName}.`,
+      };
+    }
     return {
       title: `${score.player.name} on ${score.beatmap.artist} - ${score.beatmap.title} | ${appName}`,
       description: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] | ${Math.round(score.score)} score | ${Number(score.acc).toFixed(2)}% accuracy | ${modeName(score.mode)} | ${Math.round(score.pp)}pp | Grade ${score.grade} | ${score.max_combo}x combo | ${score.nmiss} misses | ${score.player.name}`,
@@ -159,22 +190,38 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
     } catch (error) {
       console.error(`Could not load leaderboard metadata for ${pathname}:`, error);
     }
-    return { title: `${mode} leaderboard | ${appName}`, description };
+    return {
+      title: `${mode} leaderboard | ${appName}`,
+      description,
+      type: "website",
+    };
   }
 
   if (pathname === "/clans") {
     return {
       title: `Clans | ${appName}`,
       description: `Browse player-run clans on ${appName}.`,
+      type: "website",
     };
   }
 
   const clanMatch = pathname.match(/^\/clan\/(\d+)$/);
   if (clanMatch) {
-    const clan = await fetchJson(`/v2/clans/${clanMatch[1]}`);
+    let clan;
+    try {
+      clan = await fetchJson(`/v2/clans/${clanMatch[1]}`);
+    } catch (error) {
+      console.error(`Could not load clan metadata for ${pathname}:`, error);
+      return {
+        title: `Clan #${clanMatch[1]} | ${appName}`,
+        description: `View clan #${clanMatch[1]} on ${appName}.`,
+        type: "profile",
+      };
+    }
     return {
       title: `[${clan.tag}] ${clan.name} | ${appName}`,
       description: `[${clan.tag}] ${clan.name} clan on ${appName}.`,
+      type: "profile",
     };
   }
 
@@ -182,30 +229,37 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
     "/": {
       title: appName,
       description: `${appName} osu! server with player profiles, leaderboards, beatmaps, and scores.`,
+      type: "website",
     },
     "/login": {
       title: `Sign in | ${appName}`,
       description: `Sign in to your ${appName} account.`,
+      type: "website",
     },
     "/register": {
       title: `Register | ${appName}`,
       description: `Create an account on ${appName}.`,
+      type: "website",
     },
     "/forgot-password": {
       title: `Reset password | ${appName}`,
       description: `Reset your ${appName} account password.`,
+      type: "website",
     },
     "/verify-email": {
       title: `Verify email | ${appName}`,
       description: `Verify your email address for ${appName}.`,
+      type: "website",
     },
     "/friends": {
       title: `Friends | ${appName}`,
       description: `View your friends on ${appName}.`,
+      type: "website",
     },
     "/settings": {
       title: `Settings | ${appName}`,
       description: `Manage your ${appName} account and profile.`,
+      type: "website",
     },
   };
   if (pageMetadata[pathname]) return pageMetadata[pathname];
