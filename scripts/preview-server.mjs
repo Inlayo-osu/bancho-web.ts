@@ -222,7 +222,7 @@ async function serve(request, response) {
   const template = await readFile(path.join(dist, "index.html"), "utf8");
   const userAgent = request.headers["user-agent"] || "";
 
-  if (botPattern.test(userAgent)) {
+  if (botPattern.test(userAgent) || !path.extname(pathname)) {
     try {
       const metadata = await getMetadata(pathname, requestUrl.searchParams);
       const html = injectMeta(template, { ...metadata, url: `${siteUrl}${pathname}` });
