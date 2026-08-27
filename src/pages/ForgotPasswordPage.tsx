@@ -33,7 +33,7 @@ export function ForgotPasswordPage() {
         setMessage("Your password has been reset. You can sign in now.");
       } else {
         await api.requestPasswordReset(email);
-        setMessage("If an account uses this email, a reset link is on its way.");
+        setMessage("Password reset email sent.");
       }
     } catch (submitError) {
       setError(

@@ -24,6 +24,7 @@ export function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -33,11 +34,12 @@ export function RegisterPage() {
   const emailVerified = emailVerificationToken !== "";
 
   async function sendVerificationEmail() {
+    setMessage(null);
     setError(null);
     setIsSendingEmail(true);
     try {
       await api.requestEmailVerification(email);
-      setError("Verification email sent. Enter the token from the email.");
+      setMessage("Verification email sent.");
     } catch (sendError) {
       setError(
         sendError instanceof ApiError
@@ -50,11 +52,13 @@ export function RegisterPage() {
   }
 
   async function verifyEmail() {
+    setMessage(null);
     setError(null);
     setIsVerifyingEmail(true);
     try {
       const result = await api.confirmEmailVerification(emailToken);
       setEmailVerificationToken(result.data.verification_token);
+      setMessage("Email verified.");
     } catch (verifyError) {
       setError(
         verifyError instanceof ApiError
@@ -72,6 +76,7 @@ export function RegisterPage() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    setMessage(null);
     setError(null);
 
     if (password !== confirmPassword) {
@@ -131,6 +136,11 @@ export function RegisterPage() {
             {error}
           </p>
         )}
+        {message && (
+          <p className="rounded-lg border border-blue-400/30 bg-blue-400/10 px-3 py-2 text-sm text-blue-300">
+            {message}
+          </p>
+        )}
 
         <label className="block">
           <span className="mb-1.5 block text-sm font-medium text-muted">
@@ -172,9 +182,13 @@ export function RegisterPage() {
               type="button"
               disabled={!email || isSendingEmail || emailVerified}
               onClick={sendVerificationEmail}
-              className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-semibold transition-colors hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isSendingEmail ? "Sending..." : emailVerified ? "Verified" : "Send verification email"}
+              {isSendingEmail
+                ? "Sending..."
+                : emailVerified
+                  ? "Verified"
+                  : "Send verification email"}
             </button>
           </div>
           <div className="mt-2 flex gap-2">
@@ -195,7 +209,11 @@ export function RegisterPage() {
               onClick={verifyEmail}
               className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isVerifyingEmail ? "Checking..." : emailVerified ? "Verified" : "Verify"}
+              {isVerifyingEmail
+                ? "Checking..."
+                : emailVerified
+                  ? "Verified"
+                  : "Verify"}
             </button>
           </div>
         </label>
