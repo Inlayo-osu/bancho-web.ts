@@ -65,6 +65,9 @@ export function RegisterPage() {
       <p className="mt-1 text-center text-sm text-muted">
         One account for the website and the game client.
       </p>
+      <p className="mx-auto mt-3 max-w-sm text-center text-sm text-accent">
+        You&apos;ll need to verify your email before you can sign in.
+      </p>
 
       <form
         onSubmit={onSubmit}
@@ -146,7 +149,9 @@ export function RegisterPage() {
           disabled={isSubmitting}
           className="w-full rounded-xl bg-accent px-4 py-2.5 font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Creating account..." : "Create account"}
+          {isSubmitting
+            ? "Creating account..."
+            : "Create account & send verification email"}
         </button>
 
         <p className="text-center text-sm text-muted">
