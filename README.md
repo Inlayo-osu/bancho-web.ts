@@ -11,6 +11,8 @@ built with React + TypeScript. It's an SPA driven entirely by bancho.py's
 - **Registration & sign in** — website account creation (backed by bancho.py's
   v2 accounts/sessions apis) with optional captcha (reCAPTCHA, hCaptcha or
   Turnstile); important since bancho.py disables in-game registration by default
+- **Email verification & password reset** — requires the backend email API
+  described below
 - **Home** — server stats (online/registered players) & "how to connect" guide
 - **Leaderboards** — per-mode rankings (vanilla/relax/autopilot) with
   performance/score/accuracy/playcount sorts, country filtering, avatars,
@@ -90,6 +92,24 @@ All `VITE_*` variables are baked in at build time (see `.env.example`):
 | `VITE_API_BASE_URL`     | Base url for api requests              | `/api`              |
 | `VITE_AVATARS_BASE_URL` | Base url for avatars (`a.{DOMAIN}`)    | `https://a.cmyui.xyz` |
 | `VITE_DISCORD_INVITE`   | Discord invite shown in the footer (keep in sync with bancho.py's `DISCORD_INVITE`) | empty = hidden |
+
+### Email authentication API
+
+The frontend never handles SMTP credentials. Configure SMTP on the backend and
+have it implement these JSON endpoints, using the existing `{status, data,
+meta}` response envelope:
+
+| Method | Path | Body |
+| ------ | ---- | ---- |
+| `POST` | `/v2/account/email-verification` | `{ "email": "..." }` |
+| `POST` | `/v2/account/email-verification/confirm` | `{ "token": "..." }` |
+| `POST` | `/v2/account/password-reset` | `{ "email": "..." }` |
+| `POST` | `/v2/account/password-reset/confirm` | `{ "token": "...", "password": "..." }` |
+
+Verification and reset tokens should be single-use, short-lived, stored hashed,
+and rate-limited. The email and reset request endpoints should return the same
+generic success message for unknown email addresses to avoid account
+enumeration.
 
 ## Deployment
 

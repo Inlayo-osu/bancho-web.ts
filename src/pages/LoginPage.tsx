@@ -91,6 +91,15 @@ export function LoginPage() {
           {isSubmitting ? "Signing in..." : "Sign in"}
         </button>
 
+        <p className="text-center text-sm">
+          <Link
+            to="/forgot-password"
+            className="text-accent hover:text-accent-hover"
+          >
+            Forgot your password?
+          </Link>
+        </p>
+
         <p className="text-center text-sm text-muted">
           New here?{" "}
           <Link to="/register" className="text-accent hover:text-accent-hover">

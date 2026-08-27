@@ -105,9 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       captchaToken: string | null;
     }) => {
       await api.registerAccount(args);
-      await login(args.username, args.password);
     },
-    [login],
+    [],
   );
 
   const logout = useCallback(async () => {

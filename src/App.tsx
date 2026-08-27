@@ -5,6 +5,7 @@ import { BeatmapPage } from "@/pages/BeatmapPage";
 import { ClanPage } from "@/pages/ClanPage";
 import { ClansPage } from "@/pages/ClansPage";
 import { FriendsPage } from "@/pages/FriendsPage";
+import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { HomePage } from "@/pages/HomePage";
 import { LeaderboardPage } from "@/pages/LeaderboardPage";
 import { LoginPage } from "@/pages/LoginPage";
@@ -13,6 +14,7 @@ import { PlayerPage } from "@/pages/PlayerPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ScorePage } from "@/pages/ScorePage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { VerifyEmailPage } from "@/pages/VerifyEmailPage";
 
 export default function App() {
   return (
@@ -27,6 +29,8 @@ export default function App() {
         <Route path="/s/:scoreId" element={<ScorePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />

@@ -135,6 +135,18 @@ export const api = {
       captcha_token: args.captchaToken,
     }),
 
+  requestEmailVerification: (email: string) =>
+    apiPost<null>("/v2/account/email-verification", { email }),
+
+  confirmEmailVerification: (token: string) =>
+    apiPost<null>("/v2/account/email-verification/confirm", { token }),
+
+  requestPasswordReset: (email: string) =>
+    apiPost<null>("/v2/account/password-reset", { email }),
+
+  confirmPasswordReset: (args: { token: string; password: string }) =>
+    apiPost<null>("/v2/account/password-reset/confirm", args),
+
   createSession: (args: { username: string; password: string }) =>
     apiPost<Player>("/v2/sessions", args),
 

@@ -43,8 +43,7 @@ export function RegisterPage() {
     setIsSubmitting(true);
     try {
       await register({ username, email, password, captchaToken });
-      // send fresh accounts to the "how to connect" guide
-      navigate("/#how-to-connect");
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (submitError) {
       setError(
         submitError instanceof ApiError
