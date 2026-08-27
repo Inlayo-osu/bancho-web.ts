@@ -21,6 +21,7 @@ export function RegisterPage() {
     () => searchParams.get("token") ?? "",
   );
   const [emailVerificationToken, setEmailVerificationToken] = useState("");
+  const [emailSent, setEmailSent] = useState(() => searchParams.has("token"));
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export function RegisterPage() {
     setIsSendingEmail(true);
     try {
       await api.requestEmailVerification(email);
+      setEmailSent(true);
       setMessage("Verification email sent.");
     } catch (sendError) {
       setError(
@@ -174,6 +176,7 @@ export function RegisterPage() {
                 setEmail(event.target.value);
                 setEmailToken("");
                 setEmailVerificationToken("");
+                setEmailSent(false);
               }}
             className={inputClass}
           />
@@ -191,31 +194,28 @@ export function RegisterPage() {
                   : "Send verification email"}
             </button>
           </div>
-          <div className="mt-2 flex gap-2">
-            <input
-              type="text"
-              placeholder="Email verification token"
-              value={emailToken}
-              onChange={(event) => {
-                setEmailToken(event.target.value);
-                setEmailVerificationToken("");
-              }}
-              disabled={emailVerified}
-              className={`${inputClass} flex-1`}
-            />
-            <button
-              type="button"
-              disabled={!emailToken || isVerifyingEmail || emailVerified}
-              onClick={verifyEmail}
-              className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isVerifyingEmail
-                ? "Checking..."
-                : emailVerified
-                  ? "Verified"
-                  : "Verify"}
-            </button>
-          </div>
+          {emailSent && !emailVerified && (
+            <div className="mt-2 flex gap-2">
+              <input
+                type="text"
+                placeholder="Email verification token"
+                value={emailToken}
+                onChange={(event) => {
+                  setEmailToken(event.target.value);
+                  setEmailVerificationToken("");
+                }}
+                className={`${inputClass} flex-1`}
+              />
+              <button
+                type="button"
+                disabled={!emailToken || isVerifyingEmail}
+                onClick={verifyEmail}
+                className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isVerifyingEmail ? "Checking..." : "Verify"}
+              </button>
+            </div>
+          )}
         </label>
 
         <label className="block">
