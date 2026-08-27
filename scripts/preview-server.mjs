@@ -1,10 +1,24 @@
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dist = path.join(root, "dist");
+
+for (const envFile of [".env"]) {
+  try {
+    const contents = readFileSync(path.join(root, envFile), "utf8");
+    for (const line of contents.split(/\r?\n/)) {
+      const match = line.match(/^\s*([A-Z][A-Z0-9_]*)\s*=\s*(.*?)\s*$/);
+      if (match && process.env[match[1]] === undefined) {
+        process.env[match[1]] = match[2].replace(/^(["'])(.*)\1$/, "$2");
+      }
+    }
+  } catch {}
+}
+
 const appName = process.env.VITE_APP_NAME || "Inlayo";
 const siteUrl = (process.env.META_SITE_URL || "http://localhost:4173").replace(/\/$/, "");
 const apiTarget = (process.env.META_API_TARGET || "http://127.0.0.1:10000").replace(/\/$/, "");
@@ -131,7 +145,9 @@ async function serve(request, response) {
       response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       response.end(html);
       return;
-    } catch {}
+    } catch (error) {
+      console.error(`Could not create metadata for ${pathname}:`, error);
+    }
   }
 
   const requestedFile = pathname === "/" ? "index.html" : pathname.slice(1);
