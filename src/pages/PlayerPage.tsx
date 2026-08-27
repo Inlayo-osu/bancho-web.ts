@@ -16,6 +16,7 @@ import { PillTabs } from "@/components/ui/PillTabs";
 import { api, type ScoreScope } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/http";
 import type { MostPlayedMap, PlayerScore } from "@/lib/api/types";
+import { env } from "@/lib/env";
 import { replayDownloadUrl } from "@/lib/assets";
 import {
   formatAccuracy,
@@ -91,7 +92,17 @@ export function PlayerPage() {
     select: (envelope) => envelope.data,
   });
 
-  usePageTitle(playerQuery.data?.name);
+  const player = playerQuery.data;
+  const profileStats = statsQuery.data?.find((entry) => entry.mode === 0);
+  usePageTitle(player?.name, {
+    description: player
+      ? `${player.name} is a player from ${player.country}. ${
+          profileStats?.rank != null ? `Rank #${formatNumber(profileStats.rank)} · ` : ""
+        }${profileStats ? formatPerformance(profileStats.pp) : "Profile and scores"}.`
+      : undefined,
+    image: player ? `${env.avatarsBaseUrl}/${player.id}` : undefined,
+    type: "profile",
+  });
 
   if (playerQuery.isPending) {
     return <LoadingState label="Loading player..." />;
@@ -100,7 +111,6 @@ export function PlayerPage() {
     return <ErrorState error={playerQuery.error} />;
   }
 
-  const player = playerQuery.data;
   const stats = statsQuery.data?.find((entry) => entry.mode === modeId);
   const isOnline = statusQuery.isSuccess;
   const isRestricted = (player.priv & 1) === 0;

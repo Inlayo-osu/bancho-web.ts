@@ -52,6 +52,12 @@ export function BeatmapPage() {
     beatmap
       ? `${beatmap.artist} - ${beatmap.title} [${beatmap.version}]`
       : undefined,
+    {
+      description: beatmap
+        ? `${beatmap.artist} - ${beatmap.title} [${beatmap.version}] mapped by ${beatmap.creator}.`
+        : undefined,
+      image: beatmap ? beatmapCoverUrl(beatmap.set_id) : undefined,
+    },
   );
 
   if (!Number.isInteger(mapId) || mapId <= 0) {

@@ -35,6 +35,12 @@ export function ScorePage() {
     data
       ? `${data.player.name} on ${data.beatmap.artist} - ${data.beatmap.title}`
       : undefined,
+    {
+      description: data
+        ? `${data.player.name} scored ${formatPerformance(data.pp)} on ${data.beatmap.artist} - ${data.beatmap.title}.`
+        : undefined,
+      image: data ? beatmapCoverUrl(data.beatmap.set_id) : undefined,
+    },
   );
 
   if (!Number.isInteger(scoreId) || scoreId <= 0) {

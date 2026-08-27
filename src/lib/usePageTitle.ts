@@ -1,12 +1,8 @@
-import { useEffect } from "react";
+import { usePageMeta, type PageMeta } from "@/lib/usePageMeta";
 
-import { env } from "@/lib/env";
-
-export function usePageTitle(title: string | undefined) {
-  useEffect(() => {
-    document.title = title ? `${title} · ${env.appName}` : env.appName;
-    return () => {
-      document.title = env.appName;
-    };
-  }, [title]);
+export function usePageTitle(
+  title: string | undefined,
+  meta: Omit<PageMeta, "title"> = {},
+) {
+  usePageMeta({ ...meta, title });
 }
