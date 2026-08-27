@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
 import { CaptchaWidget } from "@/components/CaptchaWidget";
+import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/http";
 import { useAuth } from "@/lib/auth";
 import { env } from "@/lib/env";
@@ -12,16 +13,58 @@ export function RegisterPage() {
 
   const { player, register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [emailToken, setEmailToken] = useState(
+    () => searchParams.get("token") ?? "",
+  );
+  const [emailVerificationToken, setEmailVerificationToken] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
 
   const captchaRequired = env.captchaProvider !== null && !!env.captchaSiteKey;
+  const emailVerified = emailVerificationToken !== "";
+
+  async function sendVerificationEmail() {
+    setError(null);
+    setIsSendingEmail(true);
+    try {
+      await api.requestEmailVerification(email);
+      setError("Verification email sent. Enter the token from the email.");
+    } catch (sendError) {
+      setError(
+        sendError instanceof ApiError
+          ? sendError.message
+          : "Could not send the verification email.",
+      );
+    } finally {
+      setIsSendingEmail(false);
+    }
+  }
+
+  async function verifyEmail() {
+    setError(null);
+    setIsVerifyingEmail(true);
+    try {
+      const result = await api.confirmEmailVerification(emailToken);
+      setEmailVerificationToken(result.data.verification_token);
+    } catch (verifyError) {
+      setError(
+        verifyError instanceof ApiError
+          ? verifyError.message
+          : "That verification token is invalid or expired.",
+      );
+    } finally {
+      setIsVerifyingEmail(false);
+    }
+  }
 
   if (player) {
     return <Navigate to={`/u/${player.id}`} replace />;
@@ -42,8 +85,18 @@ export function RegisterPage() {
 
     setIsSubmitting(true);
     try {
-      await register({ username, email, password, captchaToken });
-      navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+      if (!emailVerified) {
+        setError("Verify your email before creating an account.");
+        return;
+      }
+      await register({
+        username,
+        email,
+        password,
+        captchaToken,
+        emailVerificationToken,
+      });
+      navigate("/#how-to-connect");
     } catch (submitError) {
       setError(
         submitError instanceof ApiError
@@ -107,9 +160,44 @@ export function RegisterPage() {
             required
             autoComplete="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setEmailToken("");
+                setEmailVerificationToken("");
+              }}
             className={inputClass}
           />
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              disabled={!email || isSendingEmail || emailVerified}
+              onClick={sendVerificationEmail}
+              className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-semibold transition-colors hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSendingEmail ? "Sending..." : emailVerified ? "Verified" : "Send verification email"}
+            </button>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              placeholder="Email verification token"
+              value={emailToken}
+              onChange={(event) => {
+                setEmailToken(event.target.value);
+                setEmailVerificationToken("");
+              }}
+              disabled={emailVerified}
+              className={`${inputClass} flex-1`}
+            />
+            <button
+              type="button"
+              disabled={!emailToken || isVerifyingEmail || emailVerified}
+              onClick={verifyEmail}
+              className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isVerifyingEmail ? "Checking..." : emailVerified ? "Verified" : "Verify"}
+            </button>
+          </div>
         </label>
 
         <label className="block">
@@ -146,12 +234,12 @@ export function RegisterPage() {
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !emailVerified}
           className="w-full rounded-xl bg-accent px-4 py-2.5 font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting
             ? "Creating account..."
-            : "Create account & send verification email"}
+            : "Create account"}
         </button>
 
         <p className="text-center text-sm text-muted">

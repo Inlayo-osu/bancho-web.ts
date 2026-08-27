@@ -127,19 +127,24 @@ export const api = {
     email: string;
     password: string;
     captchaToken: string | null;
+    emailVerificationToken: string;
   }) =>
     apiPost<Player>("/v2/accounts", {
       username: args.username,
       email: args.email,
       password: args.password,
       captcha_token: args.captchaToken,
+      email_verification_token: args.emailVerificationToken,
     }),
 
   requestEmailVerification: (email: string) =>
     apiPost<null>("/v2/account/email-verification", { email }),
 
   confirmEmailVerification: (token: string) =>
-    apiPost<null>("/v2/account/email-verification/confirm", { token }),
+    apiPost<{ verification_token: string }>(
+      "/v2/account/email-verification/confirm",
+      { token },
+    ),
 
   requestPasswordReset: (email: string) =>
     apiPost<null>("/v2/account/password-reset", { email }),
