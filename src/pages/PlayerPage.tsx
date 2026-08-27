@@ -110,6 +110,9 @@ export function PlayerPage() {
   if (playerQuery.error) {
     return <ErrorState error={playerQuery.error} />;
   }
+  if (!player) {
+    return <ErrorState error={new ApiError("Player data is unavailable.", 500)} />;
+  }
 
   const stats = statsQuery.data?.find((entry) => entry.mode === modeId);
   const isOnline = statusQuery.isSuccess;
