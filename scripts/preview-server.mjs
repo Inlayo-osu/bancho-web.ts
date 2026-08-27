@@ -21,7 +21,7 @@ for (const envFile of [".env"]) {
 
 const appName = process.env.VITE_APP_NAME || "Inlayo";
 const siteUrl = (process.env.META_SITE_URL || "https://osu.inlayo.com").replace(/\/$/, "");
-const apiTarget = (process.env.META_API_TARGET || "http://127.0.0.1:10000").replace(/\/$/, "");
+const apiTarget = (process.env.META_API_TARGET || "https://api.inlayo.com").replace(/\/$/, "");
 const apiHost = process.env.META_API_HOST || "api.inlayo.com";
 const port = Number(process.env.META_PORT || 4173);
 
