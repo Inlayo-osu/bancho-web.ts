@@ -40,9 +40,15 @@ export function isValidModeId(modeId: number): boolean {
 }
 
 export function modeName(modeId: number): string {
-  const { baseMode, submode } = splitModeId(modeId);
-  const base = BASE_MODES[baseMode]?.name ?? "osu!";
-  if (submode === "relax") return `${base} (Relax)`;
-  if (submode === "autopilot") return `${base} (Autopilot)`;
-  return base;
+  const modeNames: Record<number, string> = {
+    0: "osu!standard",
+    1: "osu!taiko",
+    2: "osu!catch",
+    3: "osu!mania",
+    4: "rx!standard",
+    5: "rx!taiko",
+    6: "rx!catch",
+    8: "ap!standard",
+  };
+  return modeNames[modeId] ?? "osu!standard";
 }
