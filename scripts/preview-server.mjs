@@ -67,6 +67,19 @@ function modeName(modeId) {
   return modeNames[modeId] || "osu!standard";
 }
 
+function modeIdFromParams(searchParams) {
+  const baseMode = Number(searchParams.get("mode") || 0);
+  const rx = Number(searchParams.get("rx") || 0);
+  if (!Number.isInteger(baseMode) || baseMode < 0 || baseMode > 3) return 0;
+  if (rx === 1 && baseMode <= 2) return baseMode + 4;
+  if (rx === 2 && baseMode === 0) return 8;
+  return baseMode;
+}
+
+function avatarUrl(playerId) {
+  return `${process.env.VITE_AVATARS_BASE_URL || "https://a.inlayo.com"}/${playerId}`;
+}
+
 const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
 
 function countryName(countryCode) {
@@ -128,12 +141,14 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
     }
     let stats;
     try {
-      stats = (await fetchJson(`/v2/players/${player.id}/stats`)).find((entry) => entry.mode === 0);
+      stats = (await fetchJson(`/v2/players/${player.id}/stats`)).find(
+        (entry) => entry.mode === modeIdFromParams(searchParams),
+      );
     } catch {}
     return {
       title: `${player.name}'s profile | ${appName}`,
-      description: `${player.name} | ${countryName(player.country)} (${player.country.toUpperCase()}) | Global rank ${stats?.rank != null ? `#${stats.rank}` : "unranked"} | Country rank ${stats?.country_rank != null ? `#${stats.country_rank}` : "unranked"} | ${stats?.pp != null ? `${Math.round(stats.pp)}pp` : "No PP yet"} | ${stats?.acc != null ? `${Number(stats.acc).toFixed(2)}% accuracy` : ""} | ${stats?.plays != null ? `${stats.plays} plays` : ""}${player.clan_id ? ` | Clan #${player.clan_id}` : ""}`,
-      image: `${process.env.VITE_AVATARS_BASE_URL || "https://a.inlayo.com"}/${player.id}`,
+      description: `${player.name} | ${countryName(player.country)} (${player.country.toUpperCase()}) | Global rank ${stats?.rank != null ? `#${stats.rank}` : "-"} | Country rank ${stats?.country_rank != null ? `#${stats.country_rank}` : "-"} | ${stats?.pp != null ? `${Math.round(stats.pp)}pp` : "No PP yet"} | ${stats?.acc != null ? `${Number(stats.acc).toFixed(2)}% accuracy` : ""} | ${stats?.plays != null ? `${stats.plays} plays` : ""}${player.clan_id ? ` | Clan #${player.clan_id}` : ""}`,
+      image: avatarUrl(player.id),
       type: "profile",
     };
   }
@@ -177,7 +192,7 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
   }
 
   if (pathname === "/leaderboard") {
-    const modeId = Number(searchParams.get("mode") || 0);
+    const modeId = modeIdFromParams(searchParams);
     const sort = searchParams.get("sort") || "pp";
     const country = searchParams.get("country");
     const mode = modeName(modeId);
@@ -187,6 +202,13 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
       const entries = await fetchJson(`/v2/leaderboards/${modeId}?sort=${encodeURIComponent(sort)}&page=1&page_size=1${country ? `&country=${encodeURIComponent(country)}` : ""}`);
       const top = entries[0];
       if (top) description += ` | #1 ${top.name} with ${Math.round(top.pp)}pp`;
+      const image = top ? avatarUrl(top.player_id) : undefined;
+      return {
+        title: `${mode} leaderboard | ${appName}`,
+        description,
+        image,
+        type: "website",
+      };
     } catch (error) {
       console.error(`Could not load leaderboard metadata for ${pathname}:`, error);
     }
