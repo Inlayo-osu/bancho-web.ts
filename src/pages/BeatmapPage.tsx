@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/Card";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/http";
 import { beatmapCoverUrl } from "@/lib/assets";
+import { env } from "@/lib/env";
 import {
   formatAccuracy,
   formatMapLength,
@@ -134,7 +135,7 @@ export function BeatmapPage() {
           <div className="flex gap-2">
             <FavouriteButton setId={beatmap!.set_id} />
             <a
-              href={`osu://dl/${beatmap!.set_id}`}
+              href={`https://osu.${env.banchoDomain}/d/${beatmap!.set_id}`}
               className="rounded-lg bg-accent px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
             >
               osu!direct
