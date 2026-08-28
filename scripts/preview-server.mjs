@@ -301,7 +301,10 @@ async function serve(request, response) {
   if (botPattern.test(userAgent) || !path.extname(pathname)) {
     try {
       const metadata = await getMetadata(pathname, requestUrl.searchParams);
-      const html = injectMeta(template, { ...metadata, url: `${siteUrl}${pathname}` });
+      const html = injectMeta(template, {
+        ...metadata,
+        url: `${siteUrl}${pathname}${requestUrl.search}`,
+      });
       response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       response.end(html);
       return;
