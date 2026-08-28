@@ -16,37 +16,39 @@ export function Navbar() {
     // scrolling content never peeks through the notches
     <div className="sticky top-0 z-40 bg-canvas">
       <header className="rounded-b-2xl border-b border-line bg-surface">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-6 px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="text-[15px] font-semibold tracking-tight">
-            {env.appName}
-          </span>
-        </Link>
+        <div className="overflow-x-auto overscroll-x-contain">
+          <div className="mx-auto flex h-14 min-w-max w-full max-w-6xl items-center gap-6 px-4 sm:px-6">
+            <Link to="/" className="flex shrink-0 items-center gap-2.5">
+              <span className="text-[15px] font-semibold tracking-tight">
+                {env.appName}
+              </span>
+            </Link>
 
-        <nav className="flex items-center gap-1">
-          {NAV_LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={({ isActive }) =>
-                `rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-surface-2 text-slate-100"
-                    : "text-muted hover:text-slate-100"
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </nav>
+            <nav className="flex shrink-0 items-center gap-1">
+              {NAV_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-surface-2 text-slate-100"
+                        : "text-muted hover:text-slate-100"
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </nav>
 
-        <div className="ml-auto flex items-center gap-3">
-          <div className="w-full max-w-xs">
-            <PlayerSearch />
+            <div className="ml-auto flex shrink-0 items-center gap-3">
+              <div className="w-64 max-w-xs">
+                <PlayerSearch />
+              </div>
+              <UserMenu />
+            </div>
           </div>
-          <UserMenu />
-        </div>
         </div>
       </header>
     </div>

@@ -191,7 +191,7 @@ export function LeaderboardPage() {
                         />
                         <Flag countryCode={entry.country} />
                         {entry.clan_tag && (
-                          <span className="text-xs font-semibold text-accent">
+                          <span className="-mr-2.5 text-xs font-semibold text-accent">
                             [{entry.clan_tag}]
                           </span>
                         )}

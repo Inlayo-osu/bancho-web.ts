@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { Avatar } from "@/components/Avatar";
 import { FriendButton } from "@/components/FriendButton";
@@ -24,6 +24,12 @@ import {
   formatPlaytime,
   formatTimeAgo,
 } from "@/lib/format";
+import {
+  isValidModeId,
+  splitModeId,
+  toModeId,
+  type Submode,
+} from "@/lib/gamemodes";
 import { getLevel } from "@/lib/level";
 import { describeStatus } from "@/lib/playerStatus";
 import { usePageTitle } from "@/lib/usePageTitle";
@@ -38,11 +44,33 @@ const SCORE_TABS: { tab: ScoresTab; label: string }[] = [
 
 export function PlayerPage() {
   const params = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   // profiles resolve by numeric id or by username
   const playerIdOrName = params.playerId ?? "";
 
-  const [modeId, setModeId] = useState(0);
+  const modeParam = Number(searchParams.get("mode") ?? "0");
+  const rxParam = Number(searchParams.get("rx") ?? "0");
+  const baseMode =
+    Number.isInteger(modeParam) && modeParam >= 0 && modeParam <= 3
+      ? modeParam
+      : 0;
+  const submode: Submode =
+    rxParam === 1 ? "relax" : rxParam === 2 ? "autopilot" : "vanilla";
+  const requestedModeId = toModeId(baseMode, submode) ?? baseMode;
+  const modeId = isValidModeId(requestedModeId)
+    ? requestedModeId
+    : 0;
   const [tab, setTab] = useState<ScoresTab>("best");
+
+  function setMode(nextModeId: number) {
+    const { baseMode, submode } = splitModeId(nextModeId);
+    const rx = submode === "relax" ? 1 : submode === "autopilot" ? 2 : 0;
+    setSearchParams((current) => {
+      current.set("mode", String(baseMode));
+      current.set("rx", String(rx));
+      return current;
+    });
+  }
 
   const playerQuery = useQuery({
     queryKey: ["player", playerIdOrName],
@@ -202,7 +230,7 @@ export function PlayerPage() {
         </div>
       )}
 
-      <ModeSwitcher modeId={modeId} onChange={setModeId} />
+      <ModeSwitcher modeId={modeId} onChange={setMode} />
 
       {/* stats grid */}
       {stats ? (
