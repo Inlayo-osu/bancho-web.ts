@@ -149,11 +149,11 @@ export function PlayerPage() {
   usePageTitle(player ? `${player.name}'s profile` : undefined, {
     description: player
       ? `${player.name} | ${player.country} | Global rank ${
-          profileStats?.rank != null ? `#${formatNumber(profileStats.rank)}` : "unranked"
+          profileStats?.rank != null ? `#${formatNumber(profileStats.rank)}` : "-"
         } | Country rank ${
           profileStats?.country_rank != null
             ? `#${formatNumber(profileStats.country_rank)}`
-            : "unranked"
+            : "-"
         } | ${profileStats ? formatPerformance(profileStats.pp) : "No PP yet"}`
       : undefined,
     image: player ? avatarUrl(player.id) : undefined,
@@ -231,7 +231,7 @@ export function PlayerPage() {
                 Global rank
               </p>
               <p className="text-xl font-semibold text-accent">
-                {stats?.rank != null ? `#${formatNumber(stats.rank)}` : "—"}
+                {stats?.rank != null ? `#${formatNumber(stats.rank)}` : "-"}
               </p>
             </div>
             <div className="space-y-0.5">
@@ -241,7 +241,7 @@ export function PlayerPage() {
               <p className="text-xl font-semibold">
                 {stats?.country_rank != null
                   ? `#${formatNumber(stats.country_rank)}`
-                  : "—"}
+                  : "-"}
               </p>
             </div>
           </div>

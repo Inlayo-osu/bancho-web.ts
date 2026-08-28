@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Avatar } from "@/components/Avatar";
@@ -9,16 +10,48 @@ export function UserMenu() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    right: number;
+  } | null>(null);
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) {
+      if (
+        !containerRef.current?.contains(event.target as Node) &&
+        !menuRef.current?.contains(event.target as Node)
+      ) {
         setOpen(false);
       }
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!open || !containerRef.current) {
+      setMenuPosition(null);
+      return;
+    }
+
+    function updateMenuPosition() {
+      const button = containerRef.current?.getBoundingClientRect();
+      if (!button) return;
+      setMenuPosition({
+        top: button.bottom + 8,
+        right: window.innerWidth - button.right,
+      });
+    }
+
+    updateMenuPosition();
+    window.addEventListener("resize", updateMenuPosition);
+    window.addEventListener("scroll", updateMenuPosition, true);
+    return () => {
+      window.removeEventListener("resize", updateMenuPosition);
+      window.removeEventListener("scroll", updateMenuPosition, true);
+    };
+  }, [open]);
 
   if (isLoading) {
     return <span className="h-8 w-8 rounded-lg bg-surface-2" />;
@@ -62,40 +95,48 @@ export function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-xl border border-line bg-surface-2 shadow-xl">
-          <Link
-            to={`/u/${player.id}`}
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2.5 text-sm hover:bg-surface-3"
+        menuPosition &&
+        createPortal(
+          <div
+            ref={menuRef}
+            style={{ top: menuPosition.top, right: menuPosition.right }}
+            className="fixed z-50 w-44 overflow-hidden rounded-xl border border-line bg-surface-2 shadow-xl"
           >
-            My profile
-          </Link>
-          <Link
-            to="/friends"
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2.5 text-sm hover:bg-surface-3"
-          >
-            Friends
-          </Link>
-          <Link
-            to="/settings"
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2.5 text-sm hover:bg-surface-3"
-          >
-            Settings
-          </Link>
-          <button
-            type="button"
-            onClick={async () => {
-              setOpen(false);
-              await logout();
-              navigate("/");
-            }}
-            className="block w-full px-4 py-2.5 text-left text-sm text-red-300 hover:bg-surface-3"
-          >
-            Sign out
-          </button>
-        </div>
+            <Link
+              to={`/u/${player.id}`}
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-sm hover:bg-surface-3"
+            >
+              My profile
+            </Link>
+            <Link
+              to="/friends"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-sm hover:bg-surface-3"
+            >
+              Friends
+            </Link>
+            <Link
+              to="/settings"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-sm hover:bg-surface-3"
+            >
+              Settings
+            </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                setOpen(false);
+                await logout();
+                navigate("/");
+              }}
+              className="block w-full px-4 py-2.5 text-left text-sm text-red-300 hover:bg-surface-3"
+            >
+              Sign out
+            </button>
+          </div>,
+          document.body,
+        )
       )}
     </div>
   );

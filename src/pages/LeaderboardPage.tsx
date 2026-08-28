@@ -73,6 +73,10 @@ export function LeaderboardPage() {
     rxParam === 1 ? "relax" : rxParam === 2 ? "autopilot" : "vanilla";
   const requestedModeId = toModeId(baseMode, submode) ?? baseMode;
   const modeId = isValidModeId(requestedModeId) ? requestedModeId : 0;
+  const { baseMode: selectedBaseMode, submode: selectedSubmode } =
+    splitModeId(modeId);
+  const selectedRx =
+    selectedSubmode === "relax" ? 1 : selectedSubmode === "autopilot" ? 2 : 0;
 
   useEffect(() => {
     const { baseMode: canonicalMode, submode: canonicalSubmode } =
@@ -226,12 +230,14 @@ export function LeaderboardPage() {
                     </td>
                     <td className="px-4 py-2">
                       <Link
-                        to={`/u/${entry.player_id}`}
+                        to={`/u/${entry.player_id}?mode=${selectedBaseMode}&rx=${selectedRx}`}
                         className="group flex items-center gap-2.5"
                       >
                         <Avatar
                           playerId={entry.player_id}
-                          className="h-7 w-7 rounded-md bg-surface-3 object-cover"
+                          className={`${
+                            entry.rank === 1 ? "h-9 w-9 rounded-lg" : "h-7 w-7 rounded-md"
+                          } bg-surface-3 object-cover`}
                         />
                         <Flag countryCode={entry.country} />
                         {entry.clan_tag && (

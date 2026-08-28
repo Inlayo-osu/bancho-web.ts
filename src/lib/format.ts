@@ -12,11 +12,23 @@ export function formatAccuracy(acc: number): string {
   return `${acc.toFixed(2)}%`;
 }
 
-/** Format a playtime in seconds as e.g. "142h 37m". */
+/** Format a playtime using the largest useful calendar units. */
 export function formatPlaytime(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  return `${formatNumber(hours)}h ${minutes}m`;
+  const totalMinutes = Math.floor(seconds / 60);
+  const minutesPerYear = 365 * 24 * 60;
+  const minutesPerDay = 24 * 60;
+  const minutesPerHour = 60;
+  const years = Math.floor(totalMinutes / minutesPerYear);
+  const days = Math.floor((totalMinutes % minutesPerYear) / minutesPerDay);
+  const hours = Math.floor((totalMinutes % minutesPerDay) / minutesPerHour);
+  const minutes = totalMinutes % minutesPerHour;
+
+  const parts: string[] = [];
+  if (years > 0) parts.push(`${formatNumber(years)}y`);
+  if (days > 0) parts.push(`${formatNumber(days)}d`);
+  if (hours > 0) parts.push(`${formatNumber(hours)}h`);
+  if (minutes > 0 || parts.length === 0) parts.push(`${formatNumber(minutes)}m`);
+  return parts.join(" ");
 }
 
 /** Format a map length in seconds as e.g. "3:07". */

@@ -55,7 +55,7 @@ export function HomePage() {
             Get started
           </Link>
           <Link
-            to="/leaderboard"
+            to="/leaderboard?mode=0&rx=0"
             className="rounded-xl border border-line bg-surface-2 px-6 py-2.5 font-semibold transition-colors hover:bg-surface-3"
           >
             Leaderboards
