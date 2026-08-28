@@ -143,6 +143,7 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
         title: `Player ${playerId} | ${appName}`,
         description: `View player ${playerId}'s profile on ${appName}.`,
         image: `${process.env.VITE_AVATARS_BASE_URL || "https://a.inlayo.com"}/${encodeURIComponent(playerId)}`,
+        twitterCard: "summary",
         type: "profile",
       };
     }
@@ -156,6 +157,7 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
       title: `${player.name}'s profile | ${appName}`,
       description: `${player.name} | ${countryName(player.country)} (${player.country.toUpperCase()}) | Global rank ${stats?.rank != null ? `#${stats.rank}` : "-"} | Country rank ${stats?.country_rank != null ? `#${stats.country_rank}` : "-"} | ${stats?.pp != null ? `${Math.round(stats.pp)}pp` : "No PP yet"} | ${stats?.acc != null ? `${Number(stats.acc).toFixed(2)}% accuracy` : ""} | ${stats?.plays != null ? `${stats.plays} plays` : ""}${player.clan_id ? ` | Clan #${player.clan_id}` : ""}`,
       image: avatarUrl(player.id),
+      twitterCard: "summary",
       type: "profile",
     };
   }

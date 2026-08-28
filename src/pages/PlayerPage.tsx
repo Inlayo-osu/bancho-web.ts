@@ -157,6 +157,7 @@ export function PlayerPage() {
         } | ${profileStats ? formatPerformance(profileStats.pp) : "No PP yet"}`
       : undefined,
     image: player ? avatarUrl(player.id) : undefined,
+    twitterCard: "summary",
     type: "profile",
   });
 
