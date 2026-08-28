@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { Avatar } from "@/components/Avatar";
@@ -12,7 +13,13 @@ import { PillTabs } from "@/components/ui/PillTabs";
 import { api, type LeaderboardSort } from "@/lib/api/client";
 import type { LeaderboardEntry } from "@/lib/api/types";
 import { COUNTRIES } from "@/lib/countries";
-import { isValidModeId, modeName } from "@/lib/gamemodes";
+import {
+  isValidModeId,
+  modeName,
+  splitModeId,
+  toModeId,
+  type Submode,
+} from "@/lib/gamemodes";
 import {
   formatAccuracy,
   formatNumber,
@@ -57,7 +64,39 @@ export function LeaderboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const modeParam = Number(searchParams.get("mode") ?? "0");
-  const modeId = isValidModeId(modeParam) ? modeParam : 0;
+  const rxParam = Number(searchParams.get("rx") ?? "0");
+  const baseMode =
+    Number.isInteger(modeParam) && modeParam >= 0 && modeParam <= 3
+      ? modeParam
+      : 0;
+  const submode: Submode =
+    rxParam === 1 ? "relax" : rxParam === 2 ? "autopilot" : "vanilla";
+  const requestedModeId = toModeId(baseMode, submode) ?? baseMode;
+  const modeId = isValidModeId(requestedModeId) ? requestedModeId : 0;
+
+  useEffect(() => {
+    const { baseMode: canonicalMode, submode: canonicalSubmode } =
+      splitModeId(modeId);
+    const canonicalRx =
+      canonicalSubmode === "relax"
+        ? 1
+        : canonicalSubmode === "autopilot"
+          ? 2
+          : 0;
+
+    if (
+      searchParams.get("mode") === String(canonicalMode) &&
+      searchParams.get("rx") === String(canonicalRx)
+    ) {
+      return;
+    }
+
+    setSearchParams((current) => {
+      current.set("mode", String(canonicalMode));
+      current.set("rx", String(canonicalRx));
+      return current;
+    }, { replace: true });
+  }, [modeId, searchParams, setSearchParams]);
   const pageParam = Number(searchParams.get("page") ?? "1");
   const page = Number.isInteger(pageParam) && pageParam >= 1 ? pageParam : 1;
   const sortParam = searchParams.get("sort") as LeaderboardSort | null;
@@ -88,7 +127,12 @@ export function LeaderboardPage() {
   }) {
     setSearchParams((params) => {
       if (next.mode !== undefined) {
-        params.set("mode", String(next.mode));
+        const { baseMode: nextBaseMode, submode: nextSubmode } =
+          splitModeId(next.mode);
+        const nextRx =
+          nextSubmode === "relax" ? 1 : nextSubmode === "autopilot" ? 2 : 0;
+        params.set("mode", String(nextBaseMode));
+        params.set("rx", String(nextRx));
         params.delete("page");
       }
       if (next.sort !== undefined) {
