@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { PillTabs } from "@/components/ui/PillTabs";
 import { api, type LeaderboardSort } from "@/lib/api/client";
 import type { LeaderboardEntry } from "@/lib/api/types";
+import { avatarUrl } from "@/lib/assets";
 import { COUNTRIES } from "@/lib/countries";
 import {
   isValidModeId,
@@ -109,8 +110,6 @@ export function LeaderboardPage() {
     : "pp";
   const country = searchParams.get("country") ?? "";
 
-  usePageTitle(`${modeName(modeId)} Leaderboard`);
-
   const { data, isPending, error } = useQuery({
     queryKey: ["leaderboard", modeId, page, sort, country],
     queryFn: () =>
@@ -121,6 +120,10 @@ export function LeaderboardPage() {
         pageSize: PAGE_SIZE,
       }),
     select: (envelope) => envelope.data,
+  });
+
+  usePageTitle(`${modeName(modeId)} Leaderboard`, {
+    image: data?.[0] ? avatarUrl(data[0].player_id) : undefined,
   });
 
   function updateParams(next: {
@@ -235,9 +238,7 @@ export function LeaderboardPage() {
                       >
                         <Avatar
                           playerId={entry.player_id}
-                          className={`${
-                            entry.rank === 1 ? "h-9 w-9 rounded-lg" : "h-7 w-7 rounded-md"
-                          } bg-surface-3 object-cover`}
+                          className="h-7 w-7 rounded-md bg-surface-3 object-cover"
                         />
                         <Flag countryCode={entry.country} />
                         {entry.clan_tag && (
