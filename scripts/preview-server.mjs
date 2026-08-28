@@ -92,7 +92,14 @@ function mapLength(seconds) {
   return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, "0")}`;
 }
 
-function injectMeta(html, { title, description, image, url, type = "website" }) {
+function injectMeta(html, {
+  title,
+  description,
+  image,
+  twitterCard,
+  url,
+  type = "website",
+}) {
   const tags = [
     `<title>${escapeHtml(title)}</title>`,
     `<link rel="canonical" href="${escapeHtml(url)}" />`,
@@ -101,7 +108,7 @@ function injectMeta(html, { title, description, image, url, type = "website" }) 
     metaTag("property", "og:description", description),
     metaTag("property", "og:url", url),
     metaTag("property", "og:type", type),
-    metaTag("name", "twitter:card", image ? "summary_large_image" : "summary"),
+    metaTag("name", "twitter:card", twitterCard || (image ? "summary_large_image" : "summary")),
     metaTag("name", "twitter:title", title),
     metaTag("name", "twitter:description", description),
     ...(image ? [metaTag("property", "og:image", image), metaTag("name", "twitter:image", image)] : []),
@@ -207,6 +214,7 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
         title: `${mode} leaderboard | ${appName}`,
         description,
         image,
+        twitterCard: "summary",
         type: "website",
       };
     } catch (error) {

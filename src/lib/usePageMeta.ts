@@ -6,6 +6,7 @@ export interface PageMeta {
   title?: string;
   description?: string;
   image?: string;
+  twitterCard?: "summary" | "summary_large_image";
   type?: "website" | "profile" | "article";
 }
 
@@ -27,7 +28,13 @@ function removeMeta(attribute: "name" | "property", key: string) {
     ?.remove();
 }
 
-export function usePageMeta({ title, description, image, type = "website" }: PageMeta) {
+export function usePageMeta({
+  title,
+  description,
+  image,
+  twitterCard,
+  type = "website",
+}: PageMeta) {
   useEffect(() => {
     const pageTitle = title ? `${title} · ${env.appName}` : env.appName;
     const pageDescription = description ?? `Explore ${env.appName}.`;
@@ -38,7 +45,11 @@ export function usePageMeta({ title, description, image, type = "website" }: Pag
     upsertMeta("property", "og:description", pageDescription);
     upsertMeta("property", "og:url", window.location.href);
     upsertMeta("property", "og:type", type);
-    upsertMeta("name", "twitter:card", image ? "summary_large_image" : "summary");
+    upsertMeta(
+      "name",
+      "twitter:card",
+      twitterCard ?? (image ? "summary_large_image" : "summary"),
+    );
     upsertMeta("name", "twitter:title", pageTitle);
     upsertMeta("name", "twitter:description", pageDescription);
 
@@ -49,5 +60,5 @@ export function usePageMeta({ title, description, image, type = "website" }: Pag
       removeMeta("property", "og:image");
       removeMeta("name", "twitter:image");
     }
-  }, [description, image, title, type]);
+  }, [description, image, title, twitterCard, type]);
 }

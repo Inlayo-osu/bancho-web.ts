@@ -124,6 +124,7 @@ export function LeaderboardPage() {
 
   usePageTitle(`${modeName(modeId)} Leaderboard`, {
     image: data?.[0] ? avatarUrl(data[0].player_id) : undefined,
+    twitterCard: "summary",
   });
 
   function updateParams(next: {
