@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { Avatar } from "@/components/Avatar";
@@ -60,6 +60,31 @@ export function PlayerPage() {
   const modeId = isValidModeId(requestedModeId)
     ? requestedModeId
     : 0;
+
+  useEffect(() => {
+    const { baseMode: canonicalMode, submode: canonicalSubmode } =
+      splitModeId(modeId);
+    const canonicalRx =
+      canonicalSubmode === "relax"
+        ? 1
+        : canonicalSubmode === "autopilot"
+          ? 2
+          : 0;
+
+    if (
+      searchParams.get("mode") === String(canonicalMode) &&
+      searchParams.get("rx") === String(canonicalRx)
+    ) {
+      return;
+    }
+
+    setSearchParams((current) => {
+      current.set("mode", String(canonicalMode));
+      current.set("rx", String(canonicalRx));
+      return current;
+    }, { replace: true });
+  }, [modeId, searchParams, setSearchParams]);
+
   const [tab, setTab] = useState<ScoresTab>("best");
 
   function setMode(nextModeId: number) {
