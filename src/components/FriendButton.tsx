@@ -46,13 +46,13 @@ export function FriendButton({ playerId }: { playerId: number }) {
       type="button"
       onClick={() => mutation.mutate()}
       disabled={mutation.isPending}
-      className={`h-[34px] w-32 rounded-lg text-center text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
+      className={
         isFriend
-          ? "border border-line bg-surface-2 hover:bg-surface-3"
-          : "bg-accent text-white hover:bg-accent-hover"
-      }`}
+          ? "rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:bg-surface-3 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+          : "rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+      }
     >
-      {isFriend ? "✓ Friends" : "+ Add friend"}
+      {isFriend ? "Remove" : "Add friend"}
     </button>
   );
 }

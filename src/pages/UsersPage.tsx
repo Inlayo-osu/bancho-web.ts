@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import { Avatar } from "@/components/Avatar";
 import { Flag } from "@/components/Flag";
+import { FriendButton } from "@/components/FriendButton";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -40,15 +41,26 @@ export function UsersPage() {
       }
 
       const onlinePlayers: Player[] = [];
-      for (const player of allPlayers) {
-        try {
-          await api.fetchPlayerStatus(player.id);
-          onlinePlayers.push(player);
-        } catch (error) {
-          if (error instanceof ApiError && error.status === 404) {
-            continue;
+      const statusChecks = await Promise.allSettled(
+        allPlayers.map(async (player) => {
+          try {
+            await api.fetchPlayerStatus(player.id);
+            return player;
+          } catch (error) {
+            if (
+              error instanceof ApiError &&
+              (error.status === 404 || error.status === 405)
+            ) {
+              return null;
+            }
+            throw error;
           }
-          throw error;
+        }),
+      );
+
+      for (const result of statusChecks) {
+        if (result.status === "fulfilled" && result.value) {
+          onlinePlayers.push(result.value);
         }
       }
 
@@ -111,9 +123,7 @@ function UserRow({ player }: { player: Player }) {
             Last seen {formatTimeAgo(player.latest_activity)}
           </p>
         </div>
-        <span className="rounded-lg border border-line bg-surface-2 px-2 py-1 text-xs font-medium text-muted">
-          #{player.id}
-        </span>
+        <FriendButton playerId={player.id} />
       </Card>
     </li>
   );
