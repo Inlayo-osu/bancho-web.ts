@@ -213,7 +213,7 @@ export function BeatmapPage() {
           <div className="flex gap-2">
             <FavouriteButton setId={beatmap!.set_id} />
             <a
-              href={`https://osu.${env.banchoDomain}/d/${beatmap!.set_id}`}
+              href={`osu://b/${beatmap!.id}`}
               className="rounded-lg bg-accent px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
             >
               osu!direct
