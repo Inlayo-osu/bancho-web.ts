@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { FavouriteButton } from "@/components/FavouriteButton";
 import { Flag } from "@/components/Flag";
@@ -19,12 +19,32 @@ import {
   formatNumber,
   formatPerformance,
 } from "@/lib/format";
+import {
+  isValidModeId,
+  splitModeId,
+  toModeId,
+  type Submode,
+} from "@/lib/gamemodes";
 import { rankedStatusDisplay } from "@/lib/rankedStatus";
 import { usePageTitle } from "@/lib/usePageTitle";
 
 export function BeatmapPage() {
   const params = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const mapId = Number(params.mapId);
+
+  const modeParam = Number(searchParams.get("mode") ?? "0");
+  const rxParam = Number(searchParams.get("rx") ?? "0");
+  const baseMode =
+    Number.isInteger(modeParam) && modeParam >= 0 && modeParam <= 3
+      ? modeParam
+      : 0;
+  const submode: Submode =
+    rxParam === 1 ? "relax" : rxParam === 2 ? "autopilot" : "vanilla";
+  const requestedModeId = toModeId(baseMode, submode) ?? baseMode;
+  const modeIdFromQuery = isValidModeId(requestedModeId)
+    ? requestedModeId
+    : 0;
 
   const beatmapQuery = useQuery({
     queryKey: ["beatmap", mapId],
@@ -44,10 +64,68 @@ export function BeatmapPage() {
   const rating = ratingQuery.data;
 
   // std maps are playable in every mode; mode-specific maps are not
-  const [modeId, setModeId] = useState(0);
+  const [modeId, setModeId] = useState(modeIdFromQuery);
+
   useEffect(() => {
-    if (beatmap && beatmap.mode !== 0) setModeId(beatmap.mode);
-  }, [beatmap]);
+    if (beatmap && beatmap.mode !== 0 && !searchParams.has("mode")) {
+      const defaultMode = beatmap.mode;
+      const { baseMode: defaultBaseMode, submode: defaultSubmode } =
+        splitModeId(defaultMode);
+      const defaultRx =
+        defaultSubmode === "relax"
+          ? 1
+          : defaultSubmode === "autopilot"
+            ? 2
+            : 0;
+
+      setModeId(defaultMode);
+      setSearchParams(
+        (current) => {
+          current.set("mode", String(defaultBaseMode));
+          current.set("rx", String(defaultRx));
+          return current;
+        },
+        { replace: true },
+      );
+      return;
+    }
+
+    const { baseMode: canonicalMode, submode: canonicalSubmode } =
+      splitModeId(modeId);
+    const canonicalRx =
+      canonicalSubmode === "relax"
+        ? 1
+        : canonicalSubmode === "autopilot"
+          ? 2
+          : 0;
+
+    if (
+      searchParams.get("mode") === String(canonicalMode) &&
+      searchParams.get("rx") === String(canonicalRx)
+    ) {
+      return;
+    }
+
+    setSearchParams(
+      (current) => {
+        current.set("mode", String(canonicalMode));
+        current.set("rx", String(canonicalRx));
+        return current;
+      },
+      { replace: true },
+    );
+  }, [beatmap, modeId, searchParams, setSearchParams]);
+
+  function updateMode(nextModeId: number) {
+    const { baseMode, submode } = splitModeId(nextModeId);
+    const rx = submode === "relax" ? 1 : submode === "autopilot" ? 2 : 0;
+    setModeId(nextModeId);
+    setSearchParams((current) => {
+      current.set("mode", String(baseMode));
+      current.set("rx", String(rx));
+      return current;
+    });
+  }
 
   usePageTitle(
     beatmap
@@ -152,7 +230,7 @@ export function BeatmapPage() {
         </div>
       </Card>
 
-      <ModeSwitcher modeId={modeId} onChange={setModeId} />
+      <ModeSwitcher modeId={modeId} onChange={updateMode} />
 
       <MapLeaderboard mapId={mapId} modeId={modeId} />
     </div>

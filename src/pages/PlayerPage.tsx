@@ -414,14 +414,16 @@ function ScoreList({
   return (
     <ul className="space-y-1.5">
       {data.map((score) => (
-        <ScoreRow key={score.id} score={score} />
+        <ScoreRow key={score.id} score={score} modeId={modeId} />
       ))}
     </ul>
   );
 }
 
-function ScoreRow({ score }: { score: PlayerScore }) {
+function ScoreRow({ score, modeId }: { score: PlayerScore; modeId: number }) {
   const beatmap = score.beatmap;
+  const { baseMode, submode } = splitModeId(modeId);
+  const rx = submode === "relax" ? 1 : submode === "autopilot" ? 2 : 0;
   return (
     // the whole row links to the score page via an overlay; inner links
     // (the beatmap title) sit above it on the z axis
@@ -441,7 +443,7 @@ function ScoreRow({ score }: { score: PlayerScore }) {
       <div className="min-w-0 flex-1 py-2">
         {beatmap ? (
           <Link
-            to={`/b/${beatmap.id}`}
+            to={`/b/${beatmap.id}?mode=${baseMode}&rx=${rx}`}
             className="relative z-10 block max-w-fit truncate font-medium hover:text-accent"
           >
             {beatmap.artist} - {beatmap.title}{" "}
@@ -501,13 +503,15 @@ function MostPlayedList({
   return (
     <ul className="space-y-1.5">
       {data.map((map) => (
-        <MostPlayedRow key={map.id} map={map} />
+        <MostPlayedRow key={map.id} map={map} modeId={modeId} />
       ))}
     </ul>
   );
 }
 
-function MostPlayedRow({ map }: { map: MostPlayedMap }) {
+function MostPlayedRow({ map, modeId }: { map: MostPlayedMap; modeId: number }) {
+  const { baseMode, submode } = splitModeId(modeId);
+  const rx = submode === "relax" ? 1 : submode === "autopilot" ? 2 : 0;
   return (
     <li className="flex items-center gap-3.5 overflow-hidden rounded-xl border border-line bg-surface pr-4 transition-colors hover:bg-surface-2">
       <BeatmapThumb
@@ -516,7 +520,7 @@ function MostPlayedRow({ map }: { map: MostPlayedMap }) {
       />
       <div className="min-w-0 flex-1 py-2">
         <Link
-          to={`/b/${map.id}`}
+          to={`/b/${map.id}?mode=${baseMode}&rx=${rx}`}
           className="block truncate font-medium hover:text-accent"
         >
           {map.artist} - {map.title}{" "}
