@@ -48,54 +48,7 @@ export function PlayerPage() {
   // profiles resolve by numeric id or by username
   const playerIdOrName = params.playerId ?? "";
 
-  const modeParam = Number(searchParams.get("mode") ?? "0");
-  const rxParam = Number(searchParams.get("rx") ?? "0");
-  const baseMode =
-    Number.isInteger(modeParam) && modeParam >= 0 && modeParam <= 3
-      ? modeParam
-      : 0;
-  const submode: Submode =
-    rxParam === 1 ? "relax" : rxParam === 2 ? "autopilot" : "vanilla";
-  const requestedModeId = toModeId(baseMode, submode) ?? baseMode;
-  const modeId = isValidModeId(requestedModeId)
-    ? requestedModeId
-    : 0;
-
-  useEffect(() => {
-    const { baseMode: canonicalMode, submode: canonicalSubmode } =
-      splitModeId(modeId);
-    const canonicalRx =
-      canonicalSubmode === "relax"
-        ? 1
-        : canonicalSubmode === "autopilot"
-          ? 2
-          : 0;
-
-    if (
-      searchParams.get("mode") === String(canonicalMode) &&
-      searchParams.get("rx") === String(canonicalRx)
-    ) {
-      return;
-    }
-
-    setSearchParams((current) => {
-      current.set("mode", String(canonicalMode));
-      current.set("rx", String(canonicalRx));
-      return current;
-    }, { replace: true });
-  }, [modeId, searchParams, setSearchParams]);
-
   const [tab, setTab] = useState<ScoresTab>("best");
-
-  function setMode(nextModeId: number) {
-    const { baseMode, submode } = splitModeId(nextModeId);
-    const rx = submode === "relax" ? 1 : submode === "autopilot" ? 2 : 0;
-    setSearchParams((current) => {
-      current.set("mode", String(baseMode));
-      current.set("rx", String(rx));
-      return current;
-    });
-  }
 
   const playerQuery = useQuery({
     queryKey: ["player", playerIdOrName],
@@ -119,6 +72,65 @@ export function PlayerPage() {
     select: (envelope) => envelope.data,
   });
   const playerId = playerQuery.data?.id ?? 0;
+
+  const modeParam = Number(searchParams.get("mode") ?? "-1");
+  const rxParam = Number(searchParams.get("rx") ?? "0");
+  const baseMode =
+    Number.isInteger(modeParam) && modeParam >= 0 && modeParam <= 3
+      ? modeParam
+      : 0;
+  const submode: Submode =
+    rxParam === 1 ? "relax" : rxParam === 2 ? "autopilot" : "vanilla";
+  const requestedModeId = toModeId(baseMode, submode) ?? baseMode;
+  const explicitModeId =
+    searchParams.has("mode") || searchParams.has("rx")
+      ? isValidModeId(requestedModeId)
+        ? requestedModeId
+        : 0
+      : null;
+
+  const playerPreferredModeId =
+    playerQuery.data && isValidModeId(playerQuery.data.preferred_mode)
+      ? playerQuery.data.preferred_mode
+      : 0;
+  const modeId = explicitModeId ?? playerPreferredModeId;
+
+  useEffect(() => {
+    if (!searchParams.has("mode") && !searchParams.has("rx") && playerQuery.isPending) {
+      return;
+    }
+    const { baseMode: canonicalMode, submode: canonicalSubmode } =
+      splitModeId(modeId);
+    const canonicalRx =
+      canonicalSubmode === "relax"
+        ? 1
+        : canonicalSubmode === "autopilot"
+          ? 2
+          : 0;
+
+    if (
+      searchParams.get("mode") === String(canonicalMode) &&
+      searchParams.get("rx") === String(canonicalRx)
+    ) {
+      return;
+    }
+
+    setSearchParams((current) => {
+      current.set("mode", String(canonicalMode));
+      current.set("rx", String(canonicalRx));
+      return current;
+    }, { replace: true });
+  }, [modeId, searchParams, setSearchParams]);
+
+  function setMode(nextModeId: number) {
+    const { baseMode, submode } = splitModeId(nextModeId);
+    const rx = submode === "relax" ? 1 : submode === "autopilot" ? 2 : 0;
+    setSearchParams((current) => {
+      current.set("mode", String(baseMode));
+      current.set("rx", String(rx));
+      return current;
+    });
+  }
 
   const statsQuery = useQuery({
     queryKey: ["player-stats", playerId],

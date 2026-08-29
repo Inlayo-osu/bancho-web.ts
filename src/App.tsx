@@ -14,6 +14,7 @@ import { PlayerPage } from "@/pages/PlayerPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ScorePage } from "@/pages/ScorePage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { UsersPage } from "@/pages/UsersPage";
 import { VerifyEmailPage } from "@/pages/VerifyEmailPage";
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/friends" element={<FriendsPage />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

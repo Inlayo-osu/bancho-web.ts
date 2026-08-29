@@ -110,6 +110,13 @@ export function UserMenu() {
               My profile
             </Link>
             <Link
+              to="/users"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-sm hover:bg-surface-3"
+            >
+              Users
+            </Link>
+            <Link
               to="/friends"
               onClick={() => setOpen(false)}
               className="block px-4 py-2.5 text-sm hover:bg-surface-3"

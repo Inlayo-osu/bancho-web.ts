@@ -80,6 +80,12 @@ export const api = {
   searchPlayers: (query: string) =>
     apiGet<SearchPlayer[]>("/v2/players/search", { q: query }),
 
+  fetchPlayers: (options: { page?: number; pageSize?: number } = {}) =>
+    apiGet<Player[]>("/v2/players", {
+      page: options.page,
+      page_size: options.pageSize,
+    }),
+
   fetchBeatmap: (mapId: number) => apiGet<Beatmap>(`/v2/maps/${mapId}`),
 
   fetchScore: (scoreId: number) => apiGet<ScoreDetail>(`/v2/scores/${scoreId}`),
