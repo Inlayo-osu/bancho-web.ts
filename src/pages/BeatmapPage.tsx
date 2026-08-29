@@ -12,7 +12,6 @@ import { Card } from "@/components/ui/Card";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/http";
 import { beatmapCoverUrl } from "@/lib/assets";
-import { env } from "@/lib/env";
 import {
   formatAccuracy,
   formatMapLength,
