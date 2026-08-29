@@ -237,6 +237,17 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
     };
   }
 
+  if (pathname === "/users") {
+    const onlineOnly = searchParams.get("online") === "1";
+    return {
+      title: onlineOnly ? `Online players | ${appName}` : `Users | ${appName}`,
+      description: onlineOnly
+        ? `Players currently online on ${appName}.`
+        : `Browse all registered players on ${appName}.`,
+      type: "website",
+    };
+  }
+
   const clanMatch = pathname.match(/^\/clan\/(\d+)$/);
   if (clanMatch) {
     let clan;
@@ -286,6 +297,11 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
     "/friends": {
       title: `Friends | ${appName}`,
       description: `View your friends on ${appName}.`,
+      type: "website",
+    },
+    "/users": {
+      title: `Users | ${appName}`,
+      description: `Browse all registered players on ${appName}.`,
       type: "website",
     },
     "/settings": {
