@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import { Avatar } from "@/components/Avatar";
 import { Flag } from "@/components/Flag";
@@ -7,15 +7,18 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { api } from "@/lib/api/client";
+import { ApiError } from "@/lib/api/http";
 import type { Player } from "@/lib/api/types";
 import { formatTimeAgo } from "@/lib/format";
 import { usePageTitle } from "@/lib/usePageTitle";
 
 export function UsersPage() {
-  usePageTitle("Users");
+  const [searchParams] = useSearchParams();
+  const onlineOnly = searchParams.get("online") === "1";
+  usePageTitle(onlineOnly ? "Online players" : "Users");
 
   const usersQuery = useQuery({
-    queryKey: ["all-players"],
+    queryKey: ["users-list", onlineOnly],
     queryFn: async () => {
       const allPlayers: Player[] = [];
       let page = 1;
@@ -26,26 +29,55 @@ export function UsersPage() {
         allPlayers.push(...chunk);
 
         if (chunk.length < 100) {
-          return allPlayers;
+          break;
         }
 
         page += 1;
       }
+
+      if (!onlineOnly) {
+        return allPlayers;
+      }
+
+      const onlinePlayers: Player[] = [];
+      for (const player of allPlayers) {
+        try {
+          await api.fetchPlayerStatus(player.id);
+          onlinePlayers.push(player);
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 404) {
+            continue;
+          }
+          throw error;
+        }
+      }
+
+      return onlinePlayers;
     },
   });
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
-        title="Users"
-        description="Browse all registered players, starting from the beginning of the roster."
+        title={onlineOnly ? "Online players" : "Users"}
+        description={
+          onlineOnly
+            ? "Players currently online right now."
+            : "Browse all registered players, starting from the beginning of the roster."
+        }
       />
 
-      {usersQuery.isPending && <LoadingState label="Loading players..." />}
+      {usersQuery.isPending && (
+        <LoadingState label={onlineOnly ? "Loading online players..." : "Loading players..."} />
+      )}
       {usersQuery.error && <ErrorState error={usersQuery.error} />}
       {usersQuery.isSuccess &&
         (usersQuery.data.length === 0 ? (
-          <EmptyState label="No players found." />
+          <EmptyState
+            label={
+              onlineOnly ? "No players are online right now." : "No players found."
+            }
+          />
         ) : (
           <ul className="space-y-1.5">
             {usersQuery.data.map((player) => (

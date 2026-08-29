@@ -63,19 +63,23 @@ export function HomePage() {
         </div>
 
         <div className="relative z-10 mt-10 flex items-center justify-center gap-8 text-sm">
-          <div>
-            <p className="text-xl font-semibold text-accent">
-              {stats ? formatNumber(stats.online_players) : "—"}
-            </p>
-            <p className="text-muted">players online</p>
-          </div>
+          <Link to="/users?online=1" className="transition-opacity hover:opacity-90">
+            <div>
+              <p className="text-xl font-semibold text-accent">
+                {stats ? formatNumber(stats.online_players) : "—"}
+              </p>
+              <p className="text-muted">players online</p>
+            </div>
+          </Link>
           <div className="h-10 w-px bg-line" />
-          <div>
-            <p className="text-xl font-semibold">
-              {stats ? formatNumber(stats.total_players) : "—"}
-            </p>
-            <p className="text-muted">registered players</p>
-          </div>
+          <Link to="/users" className="transition-opacity hover:opacity-90">
+            <div>
+              <p className="text-xl font-semibold">
+                {stats ? formatNumber(stats.total_players) : "—"}
+              </p>
+              <p className="text-muted">registered players</p>
+            </div>
+          </Link>
         </div>
       </section>
 
