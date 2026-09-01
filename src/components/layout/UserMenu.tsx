@@ -117,6 +117,13 @@ export function UserMenu() {
               Friends
             </Link>
             <Link
+              to="/chat"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-sm hover:bg-surface-3"
+            >
+              Chat
+            </Link>
+            <Link
               to="/settings"
               onClick={() => setOpen(false)}
               className="block px-4 py-2.5 text-sm hover:bg-surface-3"
