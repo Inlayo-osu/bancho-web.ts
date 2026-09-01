@@ -68,27 +68,8 @@ export function TopPlaysPage() {
   const { data, isPending, error } = useQuery({
     queryKey: ["top-plays", modeId],
     queryFn: async () => {
-      const response = await api.fetchScores({
-        mode: modeId,
-        page: 1,
-        pageSize: 30,
-      });
-
-      const topScores = [...response.data]
-        .sort((left, right) => {
-          if (right.pp !== left.pp) return right.pp - left.pp;
-          return right.score - left.score;
-        })
-        .slice(0, 12);
-
-      const detailedScores = await Promise.all(
-        topScores.map(async (score) => {
-          const detail = await api.fetchScore(score.id);
-          return detail.data;
-        }),
-      );
-
-      return detailedScores.filter((score): score is ScoreDetail => !!score);
+      const response = await api.fetchTopPlays(modeId, { limit: 12 });
+      return response.data.filter((score): score is ScoreDetail => !!score);
     },
   });
 

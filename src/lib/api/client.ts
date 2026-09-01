@@ -16,6 +16,8 @@ import type {
   ServerStats,
   MailMessage,
   MailThreadSummary,
+  ChatChannel,
+  ChatMessage,
 } from "@/lib/api/types";
 
 export type LeaderboardSort =
@@ -174,7 +176,7 @@ export const api = {
 
   fetchCurrentSession: () => apiGet<Player>("/v2/sessions/current"),
 
-  fetchMailThreads: () => apiGet<MailThreadSummary[]>("/v2/mail/conversations"),
+  fetchMailThreads: () => apiGet<MailThreadSummary[]>('/v2/mail/conversations'),
 
   fetchMailConversation: (otherUserId: number) =>
     apiGet<MailMessage[]>(`/v2/mail/conversations/${otherUserId}`),
@@ -184,6 +186,17 @@ export const api = {
 
   sendMailMessage: (otherUserId: number, message: string) =>
     apiPost<MailMessage>(`/v2/mail/conversations/${otherUserId}/messages`, { message }),
+
+  fetchChatChannels: () => apiGet<ChatChannel[]>("/v2/chat/channels"),
+
+  fetchChatChannelMessages: (channelName: string, limit = 100) =>
+    apiGet<ChatMessage[]>(`/v2/chat/channels/${encodeURIComponent(channelName)}/messages`, { limit }),
+
+  fetchTopPlays: (mode: number, options: { limit?: number } = {}) =>
+    apiGet<ScoreDetail[]>("/v2/scores/top-plays", {
+      mode,
+      limit: options.limit ?? 12,
+    }),
 
   deleteCurrentSession: () => apiDelete<null>("/v2/sessions/current"),
 

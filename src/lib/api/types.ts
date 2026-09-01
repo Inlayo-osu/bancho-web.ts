@@ -251,6 +251,23 @@ export interface MailMessage {
   to_name: string;
 }
 
+export interface ChatChannel {
+  id: number;
+  name: string;
+  topic: string;
+  read_priv: number;
+  write_priv: number;
+  auto_join: boolean;
+}
+
+export interface ChatMessage {
+  id: number;
+  channel: string;
+  author: string;
+  text: string;
+  time: string;
+}
+
 export interface Clan {
   id: number;
   name: string;
