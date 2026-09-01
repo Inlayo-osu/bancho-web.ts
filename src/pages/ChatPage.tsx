@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Avatar } from "@/components/Avatar";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { api } from "@/lib/api/client";
-import type { ChatChannel, ChatMessage } from "@/lib/api/types";
 import { usePageTitle } from "@/lib/usePageTitle";
 
 function formatChannelLabel(name: string) {
