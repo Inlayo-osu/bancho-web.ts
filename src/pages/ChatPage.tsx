@@ -190,13 +190,22 @@ export function ChatPage() {
                             minute: "2-digit",
                           })
                         : message.time;
+                      const isMine = isDm
+                        ? message.from_id === player?.id
+                        : message.author === player?.name;
 
                       return (
                         <div
                           key={`${isDm ? `dm-${message.id}` : `${message.channel}-${message.id}`}`}
-                          className="flex justify-start"
+                          className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                         >
-                          <div className="max-w-[78%] rounded-2xl border border-line bg-surface px-3 py-2">
+                          <div
+                            className={`max-w-[78%] rounded-2xl border px-3 py-2 ${
+                              isMine
+                                ? "border-accent/40 bg-accent/10 text-slate-50"
+                                : "border-line bg-surface text-slate-100"
+                            }`}
+                          >
                             <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-muted">
                               <span>{senderName}</span>
                               <span>·</span>
@@ -230,18 +239,31 @@ export function ChatPage() {
                   ) : messages.length === 0 ? (
                     <div className="text-sm text-muted">No chat messages found in this channel yet.</div>
                   ) : (
-                    messages.map((message) => (
-                      <div key={`${message.channel}-${message.id}`} className="flex justify-start">
-                        <div className="max-w-[78%] rounded-2xl border border-line bg-surface px-3 py-2">
-                          <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-muted">
-                            <span>{message.author}</span>
-                            <span>·</span>
-                            <span>{message.time}</span>
+                    messages.map((message) => {
+                      const isMine = message.author === player?.name;
+
+                      return (
+                        <div
+                          key={`${message.channel}-${message.id}`}
+                          className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-[78%] rounded-2xl border px-3 py-2 ${
+                              isMine
+                                ? "border-accent/40 bg-accent/10 text-slate-50"
+                                : "border-line bg-surface text-slate-100"
+                            }`}
+                          >
+                            <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-muted">
+                              <span>{message.author}</span>
+                              <span>·</span>
+                              <span>{message.time}</span>
+                            </div>
+                            <p className="whitespace-pre-wrap text-sm leading-6 text-slate-100">{message.text}</p>
                           </div>
-                          <p className="whitespace-pre-wrap text-sm leading-6 text-slate-100">{message.text}</p>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </>

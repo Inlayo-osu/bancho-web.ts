@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
+import { ChatPanel } from "@/components/chat/ChatPanel";
 import { Card } from "@/components/ui/Card";
 import { api } from "@/lib/api/client";
 import { env } from "@/lib/env";
@@ -81,6 +82,13 @@ export function HomePage() {
             </div>
           </Link>
         </div>
+      </section>
+
+      <section className="w-full overflow-hidden rounded-[28px] border border-line bg-surface shadow-[0_18px_38px_rgba(15,23,42,0.35)]">
+        <div className="border-b border-line px-4 py-3">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted">Community</p>
+        </div>
+        <ChatPanel variant="page" />
       </section>
 
       {/* how to connect */}

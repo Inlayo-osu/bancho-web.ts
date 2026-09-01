@@ -7,7 +7,7 @@ import { env } from "@/lib/env";
 const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/leaderboard", label: "Leaderboard" },
-  /* { to: "/topplays", label: "Top Plays" }, */
+  { to: "/topplays", label: "Top Plays" },
 ];
 
 export function Navbar() {
