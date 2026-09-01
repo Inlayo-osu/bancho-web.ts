@@ -185,11 +185,12 @@ export function ChatPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Chat"
-        description="Server channels and public chat history."
-      />
-
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-100">Chat</h1>
+        <p className="mt-1 text-sm text-muted">
+          Server channels and public chat history.
+        </p>
+    </div>
       <div className="overflow-hidden rounded-[28px] border border-line bg-surface shadow-[0_18px_38px_rgba(15,23,42,0.35)]">
         <div className="grid min-h-[620px] grid-cols-[260px_minmax(0,1fr)]">
           <aside className="border-r border-line bg-surface-2/60">
