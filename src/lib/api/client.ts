@@ -10,9 +10,12 @@ import type {
   PlayerScore,
   PlayerStats,
   PlayerStatus,
+  Score,
   ScoreDetail,
   SearchPlayer,
   ServerStats,
+  MailMessage,
+  MailThreadSummary,
 } from "@/lib/api/types";
 
 export type LeaderboardSort =
@@ -40,6 +43,14 @@ export const api = {
     apiGet<LeaderboardEntry[]>(`/v2/leaderboards/${mode}`, {
       sort: options.sort,
       country: options.country,
+      page: options.page,
+      page_size: options.pageSize,
+    }),
+
+  fetchScores: (options: { mode?: number; userId?: number; page?: number; pageSize?: number } = {}) =>
+    apiGet<Score[]>("/v2/scores", {
+      mode: options.mode,
+      user_id: options.userId,
       page: options.page,
       page_size: options.pageSize,
     }),
@@ -162,6 +173,17 @@ export const api = {
     apiPost<Player>("/v2/sessions", args),
 
   fetchCurrentSession: () => apiGet<Player>("/v2/sessions/current"),
+
+  fetchMailThreads: () => apiGet<MailThreadSummary[]>("/v2/mail/conversations"),
+
+  fetchMailConversation: (otherUserId: number) =>
+    apiGet<MailMessage[]>(`/v2/mail/conversations/${otherUserId}`),
+
+  markMailConversationAsRead: (otherUserId: number) =>
+    apiPatch<MailMessage[]>(`/v2/mail/conversations/${otherUserId}/read`, {}),
+
+  sendMailMessage: (otherUserId: number, message: string) =>
+    apiPost<MailMessage>(`/v2/mail/conversations/${otherUserId}/messages`, { message }),
 
   deleteCurrentSession: () => apiDelete<null>("/v2/sessions/current"),
 

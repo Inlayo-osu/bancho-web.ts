@@ -56,6 +56,29 @@ export interface SearchPlayer {
   name: string;
 }
 
+export interface Score {
+  id: number;
+  map_md5: string;
+  userid: number;
+  score: number;
+  pp: number;
+  acc: number;
+  max_combo: number;
+  mods: number;
+  n300: number;
+  n100: number;
+  n50: number;
+  nmiss: number;
+  ngeki: number;
+  nkatu: number;
+  grade: string;
+  status: number;
+  mode: number;
+  play_time: string;
+  time_elapsed: number;
+  perfect: boolean;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   player_id: number;
@@ -206,6 +229,26 @@ export interface MostPlayedMap {
 export interface ServerStats {
   online_players: number;
   total_players: number;
+}
+
+export interface MailThreadSummary {
+  user_id: number;
+  name: string;
+  unread_count: number;
+  last_message: string;
+  last_message_at: number;
+  last_message_from_me: boolean;
+}
+
+export interface MailMessage {
+  id: number;
+  from_id: number;
+  to_id: number;
+  msg: string;
+  time: number;
+  read: boolean;
+  from_name: string;
+  to_name: string;
 }
 
 export interface Clan {

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { Card } from "@/components/ui/Card";
@@ -6,6 +7,12 @@ import { api } from "@/lib/api/client";
 import { env } from "@/lib/env";
 import { formatNumber } from "@/lib/format";
 import { usePageTitle } from "@/lib/usePageTitle";
+
+const INITIAL_CHAT_MESSAGES = [
+  { id: 1, author: "System", text: "Welcome to the public lobby!", time: "now" },
+  { id: 2, author: "Ari", text: "Anyone grinding mania today?", time: "just now" },
+  { id: 3, author: "Kiro", text: "I’m aiming for top plays this evening.", time: "just now" },
+];
 
 export function HomePage() {
   usePageTitle("Home");
@@ -16,6 +23,26 @@ export function HomePage() {
     refetchInterval: 60_000,
     select: (envelope) => envelope.data,
   });
+
+  const [messages, setMessages] = useState(INITIAL_CHAT_MESSAGES);
+  const [draft, setDraft] = useState("");
+
+  function handleSend(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+
+    setMessages((current) => [
+      ...current,
+      {
+        id: Date.now(),
+        author: "You",
+        text: trimmed,
+        time: "now",
+      },
+    ]);
+    setDraft("");
+  }
 
   return (
     <div className="space-y-6">
@@ -81,6 +108,70 @@ export function HomePage() {
             </div>
           </Link>
         </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1.45fr_0.95fr]">
+        <Card className="p-0 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-line px-4 py-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-muted">Live chat</p>
+              <h2 className="text-base font-semibold">#lobby</h2>
+            </div>
+            <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-medium text-emerald-300">
+              Online
+            </span>
+          </div>
+
+          <div className="flex max-h-[290px] flex-col gap-3 overflow-y-auto px-4 py-4">
+            {messages.map((message) => (
+              <div key={message.id} className="space-y-1">
+                <div className="flex items-center gap-2 text-xs text-muted">
+                  <span className="font-semibold text-slate-200">{message.author}</span>
+                  <span>{message.time}</span>
+                </div>
+                <p className="rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm text-slate-100">
+                  {message.text}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <form onSubmit={handleSend} className="border-t border-line px-4 py-3">
+            <div className="flex items-center gap-2">
+              <input
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                placeholder="Say something..."
+                className="flex-1 rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm text-slate-100 placeholder:text-muted focus:border-accent focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+              >
+                Send
+              </button>
+            </div>
+          </form>
+        </Card>
+
+        <Card>
+          <p className="text-sm font-semibold text-accent">Community</p>
+          <h2 className="mt-1 font-bold">Daily grind</h2>
+          <p className="mt-2 text-sm text-muted">
+            Check the leaderboard, jump into top plays, and use the lobby to coordinate matches or challenge runs.
+          </p>
+          <div className="mt-4 space-y-2 text-sm">
+            <Link to="/chat" className="block rounded-xl border border-line bg-surface-2 px-3 py-2 text-slate-100 hover:border-accent/60">
+              Open chat
+            </Link>
+            <Link to="/topplays" className="block rounded-xl border border-line bg-surface-2 px-3 py-2 text-slate-100 hover:border-accent/60">
+              Browse top plays
+            </Link>
+            <Link to="/leaderboard" className="block rounded-xl border border-line bg-surface-2 px-3 py-2 text-slate-100 hover:border-accent/60">
+              View rankings
+            </Link>
+          </div>
+        </Card>
       </section>
 
       {/* how to connect */}

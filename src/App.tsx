@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import { Layout } from "@/components/layout/Layout";
 import { BeatmapPage } from "@/pages/BeatmapPage";
+import { ChatPage } from "@/pages/ChatPage";
 import { ClanPage } from "@/pages/ClanPage";
 import { ClansPage } from "@/pages/ClansPage";
 import { FriendsPage } from "@/pages/FriendsPage";
@@ -9,6 +10,7 @@ import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { HomePage } from "@/pages/HomePage";
 import { LeaderboardPage } from "@/pages/LeaderboardPage";
 import { LoginPage } from "@/pages/LoginPage";
+import { TopPlaysPage } from "@/pages/TopPlaysPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PlayerPage } from "@/pages/PlayerPage";
 import { RegisterPage } from "@/pages/RegisterPage";
@@ -23,7 +25,9 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/topplays" element={<TopPlaysPage />} />
         <Route path="/clans" element={<ClansPage />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/clan/:clanId" element={<ClanPage />} />
         <Route path="/u/:playerId" element={<PlayerPage />} />
         <Route path="/b/:mapId" element={<BeatmapPage />} />

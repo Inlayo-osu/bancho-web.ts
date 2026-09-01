@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
+import { ChatPanel } from "@/components/chat/ChatPanel";
 import { PlayerSearch } from "@/components/PlayerSearch";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { env } from "@/lib/env";
@@ -7,10 +9,12 @@ import { env } from "@/lib/env";
 const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/leaderboard", label: "Leaderboard" },
-/*   { to: "/clans", label: "Clans" }, */
+  { to: "/topplays", label: "Top Plays" },
 ];
 
 export function Navbar() {
+  const [chatOpen, setChatOpen] = useState(false);
+
   return (
     // the sticky wrapper paints canvas behind the rounded corners so
     // scrolling content never peeks through the notches
@@ -46,11 +50,39 @@ export function Navbar() {
               <div className="w-64 max-w-xs">
                 <PlayerSearch />
               </div>
+
+              <button
+                type="button"
+                onClick={() => setChatOpen((current) => !current)}
+                className="relative rounded-lg border border-line bg-surface-2 px-2.5 py-1.5 text-sm font-medium text-slate-100 transition-colors hover:bg-surface-3"
+              >
+                Chat
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
+                  3
+                </span>
+              </button>
+
               <UserMenu />
             </div>
           </div>
         </div>
       </header>
+
+      {chatOpen && (
+        <div className="fixed inset-x-0 top-20 z-50 mx-auto w-[min(90vw,980px)]">
+          <div className="relative">
+            <button
+              type="button"
+              aria-label="Close chat"
+              onClick={() => setChatOpen(false)}
+              className="absolute -top-2 right-3 z-10 rounded-full border border-line bg-surface px-2 py-1 text-xs text-muted hover:text-slate-100"
+            >
+              Close
+            </button>
+            <ChatPanel variant="popover" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

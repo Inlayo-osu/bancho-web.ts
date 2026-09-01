@@ -229,6 +229,54 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
     };
   }
 
+  if (pathname === "/topplays") {
+    const modeId = modeIdFromParams(searchParams);
+    const mode = modeName(modeId);
+    try {
+      const leaderboardEntries = await fetchJson(`/v2/leaderboards/${modeId}?sort=pp&page=1&page_size=1`);
+      const topPlayer = leaderboardEntries[0];
+      if (!topPlayer) {
+        return {
+          title: `${mode} Top Plays | ${appName}`,
+          description: `Top plays for ${mode} on ${appName}.`,
+          type: "website",
+        };
+      }
+
+      const playerScores = await fetchJson(`/v2/players/${topPlayer.player_id}/scores?scope=best&mode=${modeId}&limit=1`);
+      const topScore = playerScores[0];
+      const beatmap = topScore?.beatmap;
+      const image = beatmap
+        ? `https://assets.ppy.sh/beatmaps/${beatmap.set_id}/covers/cover.jpg`
+        : avatarUrl(topPlayer.player_id);
+
+      return {
+        title: `${mode} Top Play | ${appName}`,
+        description: `${topPlayer.name} is leading ${mode} with ${Math.round(topPlayer.pp)}pp${topScore && beatmap ? ` on ${beatmap.artist} - ${beatmap.title} [${beatmap.version}]` : ""}.`,
+        image,
+        twitterCard: "summary_large_image",
+        type: "website",
+      };
+    } catch (error) {
+      console.error(`Could not load top plays metadata for ${pathname}:`, error);
+      return {
+        title: `${mode} Top Plays | ${appName}`,
+        description: `View the current top plays for ${mode} on ${appName}.`,
+        type: "website",
+      };
+    }
+  }
+
+  if (pathname === "/chat") {
+    return {
+      title: `Chat | ${appName}`,
+      description: `Join public channels and private conversations on ${appName}.`,
+      image: `${process.env.VITE_AVATARS_BASE_URL || "https://a.inlayo.com"}/1`,
+      twitterCard: "summary",
+      type: "website",
+    };
+  }
+
   if (pathname === "/clans") {
     return {
       title: `Clans | ${appName}`,
@@ -297,6 +345,11 @@ async function getMetadata(pathname, searchParams = new URLSearchParams()) {
     "/friends": {
       title: `Friends | ${appName}`,
       description: `View your friends on ${appName}.`,
+      type: "website",
+    },
+    "/chat": {
+      title: `Chat | ${appName}`,
+      description: `Join public channels and private conversations on ${appName}.`,
       type: "website",
     },
     "/users": {
