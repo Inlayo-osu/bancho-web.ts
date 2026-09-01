@@ -85,7 +85,6 @@ export function ChatPage() {
   const activeChannel = sortedChannels.find((channel) => channel.name === selectedChannel) ?? sortedChannels[0];
   const activeDmThread = sortedDMThreads.find((thread) => thread.user_id === selectedUserId) ?? sortedDMThreads[0];
 
-  const activeTitle = selectedUserId !== null && activeDmThread ? activeDmThread.name : activeChannel?.name ?? "Chat";
   const activeMessages = selectedUserId !== null ? dmMessages : messages;
   const activePending = selectedUserId !== null ? dmMessagesPending : messagesPending;
 
@@ -181,18 +180,33 @@ export function ChatPage() {
                   ) : activeMessages.length === 0 ? (
                     <div className="text-sm text-muted">No messages yet.</div>
                   ) : (
-                    activeMessages.map((message) => (
-                      <div key={`${message.channel ?? selectedUserId}-${message.id}`} className="flex justify-start">
-                        <div className="max-w-[78%] rounded-2xl border border-line bg-surface px-3 py-2">
-                          <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-muted">
-                            <span>{message.author}</span>
-                            <span>·</span>
-                            <span>{message.time}</span>
+                    activeMessages.map((message) => {
+                      const isDm = "from_id" in message;
+                      const senderName = isDm ? message.from_name : message.author;
+                      const messageText = isDm ? message.msg : message.text;
+                      const messageTime = isDm
+                        ? new Date(message.time * 1000).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : message.time;
+
+                      return (
+                        <div
+                          key={`${isDm ? `dm-${message.id}` : `${message.channel}-${message.id}`}`}
+                          className="flex justify-start"
+                        >
+                          <div className="max-w-[78%] rounded-2xl border border-line bg-surface px-3 py-2">
+                            <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-muted">
+                              <span>{senderName}</span>
+                              <span>·</span>
+                              <span>{messageTime}</span>
+                            </div>
+                            <p className="whitespace-pre-wrap text-sm leading-6 text-slate-100">{messageText}</p>
                           </div>
-                          <p className="whitespace-pre-wrap text-sm leading-6 text-slate-100">{message.text}</p>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </>
