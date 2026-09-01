@@ -118,7 +118,7 @@ export function HomePage() {
             and open!
           </p>
           <code className="mt-3 block overflow-x-auto rounded-lg bg-canvas px-3 py-2 text-xs text-slate-200">
-            https://assets.inlayo.com/patcher/Inlayo-patcher.exe
+            osu!.exe -devserver {env.banchoDomain} (I don’t recommend doing this, but if SmartScreen removes the patcher, use this method.)
           </code>
         </Card>
 
