@@ -42,11 +42,12 @@ export function ChatPanel({ variant = "page" }: ChatPanelProps) {
   const { data: mailThreads = [] } = useQuery({
     queryKey: ["mail-threads", player?.id],
     queryFn: () => api.fetchMailThreads(),
+    select: (response) => response.data,
     enabled: !!player,
     staleTime: 30_000,
   });
 
-  const activeThread = useMemo(() => {
+  const activeThread = useMemo<ChatThreadWithUser | undefined>(() => {
     const mergedThreads: ChatThreadWithUser[] = [
       ...channelThreads,
       ...mailThreads.map((thread) => ({
@@ -63,11 +64,12 @@ export function ChatPanel({ variant = "page" }: ChatPanelProps) {
     return mergedThreads.find((thread) => thread.id === activeThreadId) ?? mergedThreads[0];
   }, [activeThreadId, channelThreads, mailThreads]);
 
-  const activeDmUserId = activeThread?.type === "dm" ? activeThread.userId : null;
+  const activeDmUserId = activeThread?.type === "dm" ? activeThread.userId ?? null : null;
 
   const { data: dmConversation = [] } = useQuery({
     queryKey: ["mail-conversation", activeDmUserId],
     queryFn: () => api.fetchMailConversation(activeDmUserId!),
+    select: (response) => response.data,
     enabled: !!player && !!activeDmUserId,
     staleTime: 30_000,
   });
@@ -88,7 +90,7 @@ export function ChatPanel({ variant = "page" }: ChatPanelProps) {
     }));
   }, [activeDmUserId, dmConversation, player?.id]);
 
-  const allThreads = useMemo(() => {
+  const allThreads = useMemo<ChatThreadWithUser[]>(() => {
     const conversationThreads: ChatThreadWithUser[] = mailThreads.map((thread) => {
       const localMessages = localDmMessages[thread.user_id] ?? [];
       const conversationMessages =
@@ -110,7 +112,7 @@ export function ChatPanel({ variant = "page" }: ChatPanelProps) {
     return [...channelThreads, ...conversationThreads];
   }, [activeDmUserId, channelThreads, dmConversation, localDmMessages, mailThreads, player?.id]);
 
-  const activeThreadResolved = useMemo(
+  const activeThreadResolved = useMemo<ChatThreadWithUser | undefined>(
     () => allThreads.find((thread) => thread.id === activeThreadId) ?? allThreads[0] ?? channelThreads[0],
     [activeThreadId, allThreads, channelThreads],
   );
