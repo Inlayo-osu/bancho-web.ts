@@ -130,20 +130,23 @@ export function ChatPanel({ variant = "page" }: ChatPanelProps) {
     const trimmed = text.trim();
     if (!trimmed) return;
 
-    if (activeThreadResolved?.type === "dm" && activeThreadResolved.userId) {
-      try {
-        const created = await api.sendMailMessage(activeThreadResolved.userId, trimmed);
-        const message = mapMailMessage(created.data, player?.id);
+    if (activeThreadResolved?.type === "dm") {
+      const dmUserId = activeThreadResolved.userId;
+      if (dmUserId !== undefined) {
+        try {
+          const created = await api.sendMailMessage(dmUserId, trimmed);
+          const message = mapMailMessage(created.data, player?.id);
 
-        setLocalDmMessages((current) => ({
-          ...current,
-          [activeThreadResolved.userId]: [...(current[activeThreadResolved.userId] ?? []), message],
-        }));
+          setLocalDmMessages((current) => ({
+            ...current,
+            [dmUserId]: [...(current[dmUserId] ?? []), message],
+          }));
 
-        await queryClient.invalidateQueries({ queryKey: ["mail-threads", player?.id] });
-        return;
-      } catch {
-        // fall through to local-only message if sending fails to keep chat usable
+          await queryClient.invalidateQueries({ queryKey: ["mail-threads", player?.id] });
+          return;
+        } catch {
+          // fall through to local-only message if sending fails to keep chat usable
+        }
       }
     }
 
