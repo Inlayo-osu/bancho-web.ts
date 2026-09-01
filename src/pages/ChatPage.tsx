@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 
-import { Avatar } from "@/components/Avatar";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { api } from "@/lib/api/client";
 import type { ChatMessage, MailMessage } from "@/lib/api/types";
@@ -15,44 +14,23 @@ function formatChannelLabel(name: string) {
 
 function renderChatText(text: string) {
   const urlPattern = /(https?:\/\/[^\s<>"]+)/g;
-  const bracketPattern = /\[([^\]]+?)\]\((https?:\/\/[^\s)]+)\)/g;
-  const pieces: Array<{ type: "text" | "link"; value: string; href?: string }> = [];
+  const parts = text.split(urlPattern);
 
-  const segmented = text.split(urlPattern);
-  segmented.forEach((part, index) => {
+  return parts.map((part, index) => {
     if (index % 2 === 1) {
-      pieces.push({ type: "link", value: part, href: part });
-      return;
-    }
-
-    const nested = part.split(bracketPattern);
-    nested.forEach((nestedPart, nestedIndex) => {
-      if (nestedIndex % 3 === 0) {
-        if (nestedPart) pieces.push({ type: "text", value: nestedPart });
-      } else if (nestedIndex % 3 === 1) {
-        pieces.push({ type: "text", value: nestedPart });
-      } else if (nestedIndex % 3 === 2) {
-        pieces.push({ type: "link", value: nestedPart, href: nestedPart });
-      }
-    });
-  });
-
-  return pieces.map((piece, index) => {
-    if (piece.type === "link") {
       return (
         <a
-          key={`${piece.href ?? "link"}-${index}`}
-          href={piece.href}
+          key={`link-${index}`}
+          href={part}
           target="_blank"
           rel="noreferrer noopener"
           className="text-accent hover:text-accent-hover underline underline-offset-2"
         >
-          {piece.value}
+          {part}
         </a>
       );
     }
-
-    return <span key={`text-${index}`}>{piece.value}</span>;
+    return part ? <span key={`text-${index}`}>{part}</span> : null;
   });
 }
 
@@ -94,20 +72,18 @@ export function ChatPage() {
     enabled: !!player,
   });
 
-  const sortedChannels = useMemo(
-    () => [...channels].sort((a, b) => a.id - b.id),
-    [channels],
-  );
-
   const sortedDMThreads = useMemo(
-    () => [...mailThreads].sort((a, b) => b.unread_count - a.unread_count),
-    [mailThreads],
+    () => [...mailThreads]
+      .filter((thread) => thread.user_id !== player?.id)
+      .sort((a, b) => b.unread_count - a.unread_count),
+    [mailThreads, player?.id],
   );
 
   useEffect(() => {
     if (!selectableChannels.length) return;
-    if (!selectableChannels.some((channel) => channel.name === selectedChannel)) {
-      setSelectedChannel(selectableChannels[0].name);
+    const hasSelected = selectedChannel && selectableChannels.some((channel) => channel.name === selectedChannel);
+    if (!hasSelected) {
+      setSelectedChannel(selectableChannels[0]?.name || "#lobby");
     }
   }, [selectedChannel, selectableChannels]);
 
@@ -134,8 +110,8 @@ export function ChatPage() {
     }, { replace: true });
   }, [player, selectedUserId, setSearchParams]);
 
-  const activeChannel = selectableChannels.find((channel) => channel.name === selectedChannel) ?? selectableChannels[0];
-  const activeDmThread = sortedDMThreads.find((thread) => thread.user_id === selectedUserId) ?? sortedDMThreads[0];
+  const activeChannel = selectableChannels.find((channel) => channel.name === selectedChannel) || selectableChannels[0];
+  const activeDmThread = sortedDMThreads.find((thread) => thread.user_id === selectedUserId);
 
   const combinedDmMessages = selectedUserId !== null
     ? [...dmMessages, ...(localDmMessages[selectedUserId] ?? [])]
@@ -352,7 +328,7 @@ export function ChatPage() {
                       value={draft}
                       onChange={(event) => setDraft(event.target.value.slice(0, 500))}
                       maxLength={500}
-                      placeholder={selectedUserId !== null ? "Write a message..." : `Message ${formatChannelLabel(activeChannel.name)}...`}
+                      placeholder={selectedUserId !== null ? "Write a message..." : `Message ${formatChannelLabel(activeChannel?.name || "#lobby")}...`}
                       className="w-full bg-transparent text-sm text-slate-100 placeholder:text-muted focus:outline-none"
                     />
                     <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-muted">
