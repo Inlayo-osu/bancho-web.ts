@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 
-import { PageHeader } from "@/components/ui/PageHeader";
+import { Avatar } from "@/components/Avatar";
 import { api } from "@/lib/api/client";
 import type { ChatMessage, MailMessage } from "@/lib/api/types";
 import { useAuth } from "@/lib/auth";
@@ -41,6 +41,8 @@ export function ChatPage() {
   const [selectedChannel, setSelectedChannel] = useState<string>("#lobby");
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
+  const [showNewConversation, setShowNewConversation] = useState(false);
+  const [newUserName, setNewUserName] = useState("");
   const [localChannelMessages, setLocalChannelMessages] = useState<Record<string, ChatMessage[]>>({});
   const [localDmMessages, setLocalDmMessages] = useState<Record<number, MailMessage[]>>({});
 
@@ -195,7 +197,7 @@ export function ChatPage() {
               <p className="text-[11px] uppercase tracking-[0.18em] text-muted">Channels</p>
             </div>
 
-            <div className="space-y-1 p-2">
+            <div className="flex-1 space-y-1 overflow-y-auto p-2">
               {channelsPending ? (
                 <div className="px-3 py-2 text-sm text-muted">Loading channels...</div>
               ) : (
@@ -229,7 +231,7 @@ export function ChatPage() {
               <p className="text-[11px] uppercase tracking-[0.18em] text-muted">Messages</p>
             </div>
 
-            <div className="space-y-1 p-2">
+            <div className="flex-1 space-y-1 overflow-y-auto p-2">
               {mailPending ? (
                 <div className="px-3 py-2 text-sm text-muted">Loading messages...</div>
               ) : sortedDMThreads.length === 0 ? (
@@ -241,22 +243,64 @@ export function ChatPage() {
                     type="button"
                     onClick={() => {
                       setSelectedUserId(thread.user_id);
-                      setSelectedChannel("#announce");
+                      setShowNewConversation(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition-colors ${
+                    className={`flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left transition-colors ${
                       selectedUserId === thread.user_id
                         ? "bg-surface-3 text-slate-100"
                         : "text-muted hover:bg-surface-3 hover:text-slate-100"
                     }`}
                   >
-                    <span className="font-medium">{thread.name}</span>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Avatar
+                        playerId={thread.user_id}
+                        className="h-7 w-7 rounded border border-line bg-surface-2 object-cover flex-shrink-0"
+                      />
+                      <span className="truncate font-medium">{thread.name}</span>
+                    </div>
                     {thread.unread_count > 0 && (
-                      <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white flex-shrink-0">
                         {thread.unread_count}
                       </span>
                     )}
                   </button>
                 ))
+              )}
+              <button
+                type="button"
+                onClick={() => setShowNewConversation(!showNewConversation)}
+                className="w-full rounded-xl px-3 py-2 text-left text-sm text-accent hover:bg-surface-3 transition-colors"
+              >
+                + New conversation
+              </button>
+              {showNewConversation && (
+                <div className="space-y-2 rounded-xl border border-line bg-surface-2/40 p-3">
+                  <input
+                    type="text"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                    placeholder="Username..."
+                    className="w-full rounded-lg border border-line bg-canvas px-2 py-1.5 text-sm text-slate-100 placeholder:text-muted focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!newUserName.trim()) return;
+                      try {
+                        const user = await api.fetchPlayer(newUserName);
+                        setSelectedUserId(user.data.id);
+                        setNewUserName("");
+                        setShowNewConversation(false);
+                      } catch {
+                        // Handle error - could show toast
+                      }
+                    }}
+                    disabled={!newUserName.trim()}
+                    className="w-full rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+                  >
+                    Start
+                  </button>
+                </div>
               )}
             </div>
           </aside>
@@ -283,6 +327,7 @@ export function ChatPage() {
                     activeMessages.map((message) => {
                       const isDm = "from_id" in message;
                       const senderName = isDm ? message.from_name : message.author;
+                      const senderId = isDm ? message.from_id : undefined;
                       const rawText = isDm ? message.msg : message.text;
                       const messageText = rawText.replace(/^\u0001ACTION\s+/i, "");
                       const messageTime = isDm
@@ -298,8 +343,14 @@ export function ChatPage() {
                       return (
                         <div
                           key={`${isDm ? `dm-${message.id}` : `${message.channel}-${message.id}`}`}
-                          className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                          className={`flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"}`}
                         >
+                          {!isMine && senderId && (
+                            <Avatar
+                              playerId={senderId}
+                              className="h-7 w-7 rounded border border-line bg-surface-2 object-cover flex-shrink-0"
+                            />
+                          )}
                           <div
                             className={`max-w-[78%] rounded-2xl border px-3 py-2 ${
                               isMine
@@ -316,6 +367,12 @@ export function ChatPage() {
                               {renderChatText(messageText)}
                             </div>
                           </div>
+                          {isMine && player && (
+                            <Avatar
+                              playerId={player.id}
+                              className="h-7 w-7 rounded border border-line bg-surface-2 object-cover flex-shrink-0"
+                            />
+                          )}
                         </div>
                       );
                     })
@@ -373,8 +430,11 @@ export function ChatPage() {
                       return (
                         <div
                           key={`${message.channel}-${message.id}`}
-                          className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                          className={`flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"}`}
                         >
+                          {!isMine && (
+                            <div className="h-7 w-7 flex-shrink-0 rounded border border-line bg-surface-2" />
+                          )}
                           <div
                             className={`max-w-[78%] rounded-2xl border px-3 py-2 ${
                               isMine
@@ -391,6 +451,12 @@ export function ChatPage() {
                               {renderChatText(normalizedText)}
                             </div>
                           </div>
+                          {isMine && player && (
+                            <Avatar
+                              playerId={player.id}
+                              className="h-7 w-7 rounded border border-line bg-surface-2 object-cover flex-shrink-0"
+                            />
+                          )}
                         </div>
                       );
                     })
