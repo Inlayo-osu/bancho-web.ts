@@ -119,24 +119,32 @@ function TopPlayRow({ rank, score }: { rank: number; score: ScoreDetail }) {
   const player = score.player;
   const { baseMode, submode } = splitModeId(score.mode);
   const rx = submode === "relax" ? 1 : submode === "autopilot" ? 2 : 0;
+  const modeLabel =
+    submode === "autopilot"
+      ? "AP"
+      : submode === "relax"
+        ? "RX"
+        : "VN";
 
   return (
     <Card padded={false} className="overflow-hidden">
-      <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="flex items-center gap-3 sm:min-w-[8rem]">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/15 text-sm font-bold text-accent">
             #{rank}
           </span>
           <Avatar
             playerId={player.id}
-            className="h-10 w-10 rounded-lg border border-line bg-surface-2 object-cover"
+            className="h-11 w-11 rounded-lg border border-line bg-surface-2 object-cover"
           />
         </div>
 
-        <BeatmapThumb
-          setId={beatmap.set_id}
-          className="h-16 w-24 shrink-0 rounded-xl border border-line bg-surface-2"
-        />
+        <div className="flex items-center gap-3">
+          <BeatmapThumb
+            setId={beatmap.set_id}
+            className="h-16 w-24 shrink-0 rounded-xl border border-line bg-surface-2"
+          />
+        </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -163,6 +171,9 @@ function TopPlayRow({ rank, score }: { rank: number; score: ScoreDetail }) {
           </Link>
 
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
+            <span className="rounded border border-line bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-200">
+              {modeLabel}
+            </span>
             <span>{formatTimeAgo(score.play_time)}</span>
             <span>·</span>
             <span>{formatAccuracy(score.acc)}</span>
