@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/leaderboard", label: "Leaderboard" },
   { to: "/topplays", label: "Top Plays" },
+  { to: "/chat", label: "Chat" },
 ];
 
 export function Navbar() {
@@ -48,16 +49,6 @@ export function Navbar() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Link
-                  to="/chat"
-                  className="relative rounded-xl border border-line bg-surface-2 px-2.5 py-1.5 text-sm font-medium text-slate-100 transition-colors hover:border-accent/60 hover:bg-surface-3"
-                >
-                  Chat
-                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
-                    3
-                  </span>
-                </Link>
-
                 <UserMenu />
               </div>
             </div>

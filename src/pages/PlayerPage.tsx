@@ -237,7 +237,15 @@ export function PlayerPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-7 text-right">
+          <div className="flex items-center gap-3 text-right">
+            <Link
+              to={`/chat?userId=${player.id}`}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface-2 text-base text-slate-100 transition-colors hover:border-accent/60 hover:bg-surface-3"
+              aria-label={`Send message to ${player.name}`}
+              title={`Send message to ${player.name}`}
+            >
+              <span aria-hidden="true">✉</span>
+            </Link>
             <FriendButton playerId={player.id} />
             <div className="space-y-0.5">
               <p className="text-[11px] uppercase tracking-wider text-muted">
